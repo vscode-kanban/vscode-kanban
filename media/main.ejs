@@ -1,0 +1,47 @@
+<!--
+
+/**
+ * This file is part of the vscode-kanban distribution.
+ * Copyright (c) Marcel Joachim Kloubert.
+ *
+ * vscode-kanban is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, version 3.
+ *
+ * vscode-kanban is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- styles -->
+    <link href="<%- rootUri %>/css/main.css" rel="stylesheet">
+
+    <!-- React & co. -->
+    <script nonce="<%- nonce %>" src="<%- rootUri %>/js/react.17.0.2.js"></script>
+    <script nonce="<%- nonce %>" src="<%- rootUri %>/js/react-dom.17.0.2.js"></script>
+    <script nonce="<%- nonce %>" src="<%- rootUri %>/js/babel.7.18.13.js"></script>
+
+    <title><%= title %></title>
+  </head>
+
+  <body>
+    <div id="vscode-kanban-board"></div>
+
+    <!-- scripts -->
+    <script nonce="<%- nonce %>" src="<%- globalScriptUri %>"></script>
+
+    <!-- JSX components -->
+    <script nonce="<%- nonce %>" src="<%- componentsUri %>/board.jsx" type="text/babel"></script>
+  </body>
+</html>

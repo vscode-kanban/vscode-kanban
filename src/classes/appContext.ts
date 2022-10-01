@@ -16,13 +16,14 @@
  */
 
 import DisposableBase from './disposableBase';
-import fs from 'fs';
 import i18n, { Resource as TranslationResource, ResourceLanguage as TranslationResourceLanguage, TFunction } from 'i18next';
 import path from 'path';
 import vscode from 'vscode';
 import Workspace from './workspace';
 import type { CommandFactory } from '../commands';
 import { defaultLanguage } from '../constants';
+
+const { fs } = vscode.workspace;
 
 /**
  * Options for `AppContext` class.
@@ -71,6 +72,13 @@ export default class AppContext extends DisposableBase {
    */
   get extension(): vscode.ExtensionContext {
     return this.options.extension;
+  }
+
+  /**
+   * Returns the root URI of the media folder.
+   */
+  get mediaFolderUri(): vscode.Uri {
+    return vscode.Uri.joinPath(this.extension.extensionUri, 'media');
   }
 
   /**
@@ -131,20 +139,25 @@ export default class AppContext extends DisposableBase {
       this.addWorkspace(wsf);
     });
 
-    const i18NextFolder = path.join(this.extension.extensionUri.fsPath, 'i18n');
+    const i18NextFolder = vscode.Uri.joinPath(this.extension.extensionUri, 'i18n');
 
     const translationResource: TranslationResource = {
     };
-    for (const item of await fs.promises.readdir(i18NextFolder)) {
+
+    const filesAndFolders = await fs.readDirectory(i18NextFolder);
+    for (const [item, type] of filesAndFolders) {
+      if (type === vscode.FileType.Directory) {
+        continue;
+      }
       if (!item.endsWith('.json')) {
         continue;
       }
 
-      const fullName = path.join(i18NextFolder, item);
-      const langName = path.basename(fullName, path.extname(fullName));
+      const fullUri = vscode.Uri.joinPath(i18NextFolder, item);
+      const langName = path.basename(item, path.extname(item));
 
       const translation: TranslationResourceLanguage = JSON.parse(
-        await fs.promises.readFile(fullName, 'utf8')
+        Buffer.from(await fs.readFile(fullUri)).toString('utf8')
       );
 
       translationResource[langName] = {

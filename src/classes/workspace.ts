@@ -66,6 +66,13 @@ export default class Workspace extends DisposableBase {
   }
 
   /**
+   * Gets the underlying app.
+   */
+  get app(): AppContext {
+    return this.options.app;
+  }
+
+  /**
    * Gets the underlying folder instance.
    */
   get folder(): vscode.WorkspaceFolder {

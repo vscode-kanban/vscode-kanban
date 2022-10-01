@@ -1,2 +1,2 @@
 Icons:
-    - /icon.png (Erik Ragnar Eliasson; http://www.erikeliasson.io/)
+    - /icon.png + /media/icon.png (Erik Ragnar Eliasson; http://www.erikeliasson.io/)
