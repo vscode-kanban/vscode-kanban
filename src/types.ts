@@ -15,31 +15,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import type { Disposable } from 'vscode';
-
 /**
- * A basic disposable object.
+ * A board.
  */
-export default abstract class DisposableBase implements Disposable {
-  /**
-   * List of internal `Disposable`s, which should be handled by
-   * `dispose()` method of that instance.
-   */
-  protected readonly _disposabled: Disposable[] = [];
-
-  /**
-   * Optional handler, that is invoked after object has been disposed.
-   */
-  onDispose: (() => any) | undefined;
-
-  /**
-   * @inheritdoc
-   */
-  dispose() {
-    while (this._disposabled.length) {
-      this._disposabled.pop()?.dispose();
-    }
-
-    this.onDispose?.();
-  }
+export interface IBoard {
+  "todo": [],
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  "in-progress": [],
+  "testing": [],
+  "done": []
 }

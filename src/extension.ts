@@ -29,6 +29,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	await app.registerCommand(openBoardCommand);
 
 	context.subscriptions.push(app);
+
+	await app.start();
 }
 
 // code to deactivate the extension

@@ -1,0 +1,5 @@
+{
+  "errors": {
+    "no_board_compatible_workspace_found": "Es wurde kein Arbeitsbereich gefunden, der mit einem Kanban Board genutzt werden kann!"
+  }
+}

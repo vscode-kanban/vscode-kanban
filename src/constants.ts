@@ -15,31 +15,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import type { Disposable } from 'vscode';
+/// The default language
+export const defaultLanguage = 'en';
 
-/**
- * A basic disposable object.
- */
-export default abstract class DisposableBase implements Disposable {
-  /**
-   * List of internal `Disposable`s, which should be handled by
-   * `dispose()` method of that instance.
-   */
-  protected readonly _disposabled: Disposable[] = [];
-
-  /**
-   * Optional handler, that is invoked after object has been disposed.
-   */
-  onDispose: (() => any) | undefined;
-
-  /**
-   * @inheritdoc
-   */
-  dispose() {
-    while (this._disposabled.length) {
-      this._disposabled.pop()?.dispose();
-    }
-
-    this.onDispose?.();
-  }
-}
+/// Base name of a Kanban file.
+export const kanbanFilename = 'vscode-kanban.json';

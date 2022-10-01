@@ -16,8 +16,13 @@
  */
 
 import DisposableBase from './disposableBase';
+import fs from 'fs';
+import i18n, { Resource as TranslationResource, ResourceLanguage as TranslationResourceLanguage, TFunction } from 'i18next';
+import path from 'path';
 import vscode from 'vscode';
+import Workspace from './workspace';
 import type { CommandFactory } from '../commands';
+import { defaultLanguage } from '../constants';
 
 /**
  * Options for `AppContext` class.
@@ -33,6 +38,9 @@ export interface IAppContextOptions {
  * The application context.
  */
 export default class AppContext extends DisposableBase {
+  protected _t!: TFunction;
+  protected _workspaces: Workspace[] = [];
+
   /**
    * Initializes a new instance of that class.
    *
@@ -40,7 +48,35 @@ export default class AppContext extends DisposableBase {
    */
   constructor(public readonly options: IAppContextOptions) {
     super();
+
+    this._disposabled.push(
+      this.output = vscode.window.createOutputChannel('Kanban')
+    );
   }
+
+  /**
+   * @inheritdoc
+   */
+  dispose() {
+    super.dispose();
+
+    // dispose workspaces
+    while (this._workspaces.length) {
+      this._workspaces.pop()?.dispose();
+    }
+  }
+
+  /**
+   * Gets the underlying extension context.
+   */
+  get extension(): vscode.ExtensionContext {
+    return this.options.extension;
+  }
+
+  /**
+   * The underlying output channel.
+   */
+  readonly output: vscode.OutputChannel;
 
   /**
    * Registers a command.
@@ -54,11 +90,120 @@ export default class AppContext extends DisposableBase {
       app: this
     }));
 
-    const fullCommandName = `extension.kanban.${command.name}`;
+    const { name } = command;
+    const fullCommandName = `extension.kanban.${name}`;
 
     this._disposabled.push(
-      vscode.commands.registerCommand(fullCommandName, action),
+      vscode.commands.registerCommand(fullCommandName, async (...args: any[]) => {
+        try {
+          return await action(...args);
+        } catch (error) {
+          vscode.window.showErrorMessage(
+            `Command '${name}' failed: ${error}`
+          );
+        }
+      }),
       command
     );
+  }
+
+  /**
+   * Returns the function, whichs returns translated strings.
+   */
+  get t(): TFunction {
+    return this._t;
+  }
+
+  /**
+   * Gets a copy of the current list of workspaces.
+   *
+   * @returns {Workspace[]} The workspaces.
+   */
+  get workspaces(): Workspace[] {
+    return [...this._workspaces];
+  }
+
+  /**
+   * Starts the app.
+   */
+  async start() {
+    vscode.workspace.workspaceFolders?.forEach((wsf) => {
+      this.addWorkspace(wsf);
+    });
+
+    const i18NextFolder = path.join(this.extension.extensionUri.fsPath, 'i18n');
+
+    const translationResource: TranslationResource = {
+    };
+    for (const item of await fs.promises.readdir(i18NextFolder)) {
+      if (!item.endsWith('.json')) {
+        continue;
+      }
+
+      const fullName = path.join(i18NextFolder, item);
+      const langName = path.basename(fullName, path.extname(fullName));
+
+      const translation: TranslationResourceLanguage = JSON.parse(
+        await fs.promises.readFile(fullName, 'utf8')
+      );
+
+      translationResource[langName] = {
+        translation
+      };
+    }
+
+    let currentLang = (vscode.env.language || '').split('-')[0].toLowerCase().trim();
+    currentLang = currentLang || defaultLanguage;
+
+    this._t = await i18n.init({
+      resources: translationResource,
+      supportedLngs: Object.keys(translationResource),
+      fallbackLng: defaultLanguage,
+      interpolation: {
+        escapeValue: false // react already safes from xss
+      },
+      lng: currentLang
+    });
+  }
+
+  /// private methods
+
+  addWorkspace(folder: vscode.WorkspaceFolder) {
+    const newWS = new Workspace({
+      "app": this,
+      folder
+    });
+
+    this._workspaces.push(newWS);
+
+    newWS.init();
+  }
+
+  onDidChangeConfiguration(ev: vscode.ConfigurationChangeEvent) {
+    this.workspaces.forEach((ws) => {
+      return ws.onDidChangeConfiguration(ev);
+    });
+  }
+
+  onDidChangeWorkspaceFolders(ev: vscode.WorkspaceFoldersChangeEvent) {
+    // remove
+    ev.removed.forEach((removedWS) => {
+      const machtingWorkspaces = this._workspaces.filter((ws) => {
+        return ws.folder.index === removedWS.index;
+      });
+
+      machtingWorkspaces.forEach((matchingWS) => {
+        this._workspaces = this._workspaces.filter((ws) => {
+          return ws.folder.index !== matchingWS.folder.index;
+        });
+
+        matchingWS.dispose();
+      });
+    });
+
+    // add
+    ev.added.forEach((folder) => {
+      this.addWorkspace(folder);
+    });
   }
 }

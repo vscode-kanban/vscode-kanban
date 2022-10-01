@@ -15,19 +15,93 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import KanbanBoard from '../../classes/kanbanBoard';
 import path from 'path';
 import vscode from 'vscode';
 import type { CommandFactory } from "..";
+import type { IWorkspaceBoardFile } from '../../classes/workspace';
+
+interface IWorkspaceBoardFileQuickPickItem extends vscode.QuickPickItem {
+  file: IWorkspaceBoardFile;
+}
 
 const factory: CommandFactory = () => {
+  let openBoards: KanbanBoard[] = [];
+
   return {
-    initialize() {
+    initialize(options) {
+      const { app } = options;
+
       return async () => {
-        vscode.window.showInformationMessage('Open Board');
+        const { t } = app;
+
+        const possibleWorkspacesWithBoards = app.workspaces.map((ws) => {
+          return ws.tryGetBoardFile();
+        }).filter((ws) => ws !== false) as IWorkspaceBoardFile[];
+
+        const qpItems: IWorkspaceBoardFileQuickPickItem[] = possibleWorkspacesWithBoards.map((file) => {
+          return {
+            file,
+            label: file.workspace.folder.name,
+          };
+        });
+
+        if (qpItems.length) {
+          let selectedItem: IWorkspaceBoardFileQuickPickItem | null | undefined;
+          if (qpItems.length === 1) {
+            selectedItem = qpItems[0];
+          } else {
+            selectedItem = await vscode.window.showQuickPick<IWorkspaceBoardFileQuickPickItem>(qpItems);
+          }
+
+          if (!selectedItem) {
+            return;
+          }
+
+          const { file } = selectedItem;
+          // folder
+          try {
+            await vscode.workspace.fs.stat(file.folderUri);
+          } catch {
+            // try create directory
+            await vscode.workspace.fs.createDirectory(file.folderUri);
+          }
+          // file
+          try {
+            await vscode.workspace.fs.stat(file.fileUri);
+          } catch {
+            // create empty file
+
+            await vscode.workspace.fs.writeFile(
+              file.fileUri,
+              Buffer.from(JSON.stringify(
+                KanbanBoard.createEmpty()
+              ), 'utf8')
+            );
+          }
+
+          const newBoard = new KanbanBoard({
+            file: selectedItem.file,
+          });
+          newBoard.onDispose = () => {
+            openBoards = openBoards.filter((board) => board !== newBoard);
+          };
+
+          await newBoard.open();
+          openBoards.push(newBoard);
+        } else {
+          vscode.window.showWarningMessage(
+            t('errors.no_board_compatible_workspace_found')
+          );
+        }
       };
     },
 
-    dispose() { /** */ },
+    dispose() {
+      while (openBoards.length) {
+        openBoards.pop()?.dispose();
+      }
+    },
 
     name: path.basename(__dirname),
   };
