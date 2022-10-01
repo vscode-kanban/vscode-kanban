@@ -1,0 +1,80 @@
+{
+  "name": "vscode-kanban",
+  "displayName": "Kanban",
+  "description": "Kanban board for Visual Studio Code.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.71.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "Kanban",
+    "Project",
+    "Management",
+    "Todo",
+    "multi-root ready"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.kanban.openBoard",
+        "title": "Open Board ...",
+        "category": "Kanban"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "lint:fix": "eslint src --fix --ext ts"
+  },
+  "icon": "icon.png",
+  "badges": [
+    {
+      "description": "PayPal Donate",
+      "url": "https://img.shields.io/badge/paypal-donate-blue.svg",
+      "href": "https://paypal.me/MarcelKloubert"
+    },
+    {
+      "description": "Patreon Donate",
+      "url": "https://img.shields.io/badge/patreon-donate-red.svg",
+      "href": "https://patreon.com/mkloubert"
+    },
+    {
+      "description": "Buy me a Coffee",
+      "url": "https://img.shields.io/badge/buy%20me%20a%20coffee-donate-orange.svg",
+      "href": "https://buymeacoffee.com/mkloubert"
+    }
+  ],
+  "license": "LGPL-3.0",
+  "author": {
+    "name": "Marcel Joachim Kloubert"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vscode-kanban/vscode-kanban"
+  },
+  "bugs": {
+    "url": "https://github.com/vscode-kanban/vscode-kanban/issues"
+  },
+  "readmeFilename": "README.md",
+  "devDependencies": {
+    "@types/vscode": "1.71.0",
+    "@types/glob": "8.0.0",
+    "@types/node": "16.x",
+    "@typescript-eslint/eslint-plugin": "5.38.1",
+    "@typescript-eslint/parser": "5.38.1",
+    "eslint": "8.24.0",
+    "glob": "8.0.3",
+    "typescript": "4.7.4",
+    "@vscode/test-electron": "2.1.5"
+  }
+}

@@ -1,0 +1,2 @@
+Icons:
+    - /icon.png (Erik Ragnar Eliasson; http://www.erikeliasson.io/)
