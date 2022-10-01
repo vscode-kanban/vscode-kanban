@@ -23,8 +23,6 @@ import type { IWorkspaceBoardFile } from "./workspace";
 import type { IBoard } from "../types";
 import { getNonce } from "../utils";
 
-const { fs } = vscode.workspace;
-
 /**
  * Options for `KanbanBoard` class.
  */
@@ -121,6 +119,7 @@ export default class KanbanBoard extends DisposableBase {
   /// private methods ...
 
   private async getHTML(): Promise<string> {
+    const { fs } = vscode.workspace;
     const { webview } = this._panel;
 
     const nonce = getNonce();
@@ -134,9 +133,12 @@ export default class KanbanBoard extends DisposableBase {
     const componentsUri = webview.asWebviewUri(vscode.Uri.joinPath(this.mediaFolderUri, "components"));
 
     const mainEJSUri = vscode.Uri.joinPath(this.mediaFolderUri, 'main.ejs');
+    const mainEJS = Buffer.from(
+      await fs.readFile(mainEJSUri)
+    ).toString('utf8');
 
     return ejs.render(
-      Buffer.from(await fs.readFile(mainEJSUri)).toString('utf8'),
+      mainEJS,
       {
         colorMode,
         componentsUri: componentsUri.toString(),

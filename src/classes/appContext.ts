@@ -23,8 +23,6 @@ import Workspace from './workspace';
 import type { CommandFactory } from '../commands';
 import { defaultLanguage } from '../constants';
 
-const { fs } = vscode.workspace;
-
 /**
  * Options for `AppContext` class.
  */
@@ -135,6 +133,8 @@ export default class AppContext extends DisposableBase {
    * Starts the app.
    */
   async start() {
+    const { fs } = vscode.workspace;
+
     vscode.workspace.workspaceFolders?.forEach((wsf) => {
       this.addWorkspace(wsf);
     });

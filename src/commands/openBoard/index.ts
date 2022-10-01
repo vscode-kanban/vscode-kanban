@@ -33,6 +33,7 @@ const factory: CommandFactory = () => {
       const { app } = options;
 
       return async () => {
+        const { fs } = vscode.workspace;
         const { t } = app;
 
         const possibleWorkspacesWithBoards = app.workspaces.map((ws) => {
@@ -61,18 +62,18 @@ const factory: CommandFactory = () => {
           const { file } = selectedItem;
           // folder
           try {
-            await vscode.workspace.fs.stat(file.folderUri);
+            await fs.stat(file.folderUri);
           } catch {
             // try create directory
-            await vscode.workspace.fs.createDirectory(file.folderUri);
+            await fs.createDirectory(file.folderUri);
           }
           // file
           try {
-            await vscode.workspace.fs.stat(file.fileUri);
+            await fs.stat(file.fileUri);
           } catch {
             // create empty file
 
-            await vscode.workspace.fs.writeFile(
+            await fs.writeFile(
               file.fileUri,
               Buffer.from(JSON.stringify(
                 KanbanBoard.createEmpty()
