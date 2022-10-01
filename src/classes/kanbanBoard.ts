@@ -125,6 +125,10 @@ export default class KanbanBoard extends DisposableBase {
 
     const nonce = getNonce();
 
+    const colorMode = vscode.window.activeColorTheme.kind.toString().endsWith('Light') ?
+      'light' :
+      'dark';
+
     const rootUri = webview.asWebviewUri(this.mediaFolderUri);
     const globalScriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this.mediaFolderUri, "main.js"));
     const componentsUri = webview.asWebviewUri(vscode.Uri.joinPath(this.mediaFolderUri, "components"));
@@ -134,7 +138,9 @@ export default class KanbanBoard extends DisposableBase {
     return ejs.render(
       Buffer.from(await fs.readFile(mainEJSUri)).toString('utf8'),
       {
+        colorMode,
         componentsUri: componentsUri.toString(),
+        cspSource: webview.cspSource,
         globalScriptUri: globalScriptUri.toString(),
         nonce,
         rootUri: rootUri.toString(),

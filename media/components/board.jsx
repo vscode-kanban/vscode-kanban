@@ -1,15 +1,24 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 const KanbanBoard = () => {
-  const [now, setNow] = React.useState("");
+  // const [now, setNow] = React.useState("");
 
   React.useEffect(() => {
-      setNow(new Date().toISOString());
+      // setNow(new Date().toISOString());
   }, []);
 
   return (
       <React.Fragment>
-          <div>TestComponent: {now}</div>
+        <button type="button" class="btn btn-primary">Primary</button>
+        <button type="button" class="btn btn-secondary">Secondary</button>
+        <button type="button" class="btn btn-success">Success</button>
+        <button type="button" class="btn btn-danger">Danger</button>
+        <button type="button" class="btn btn-warning">Warning</button>
+        <button type="button" class="btn btn-info">Info</button>
+        <button type="button" class="btn btn-light">Light</button>
+        <button type="button" class="btn btn-dark">Dark</button>
+
+        <button type="button" class="btn btn-link">Link</button>
       </React.Fragment>
   );
 };
