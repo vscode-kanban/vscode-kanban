@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+
 /**
  * This file is part of the vscode-kanban distribution.
  * Copyright (c) Marcel Joachim Kloubert.
@@ -15,3 +17,30 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+window.vscodeKanban.setUIComponent('CardColumn', (props) => {
+  const { headerColor, title } = props;
+
+  // const [now, setNow] = React.useState("");
+
+  React.useEffect(() => {
+      // setNow(new Date().toISOString());
+  }, []);
+
+  return (
+    <div
+      className="col h-100 text-black cardColumn"
+    >
+      <div
+        className="h-100 text-black cardList"
+      >
+        <div className="card mw-100 h-100">
+          <div className={`card-header text-bg-${headerColor}`}>{title}</div>
+
+          <div className="card-body text-bg-light h-100">
+            mkmk
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});

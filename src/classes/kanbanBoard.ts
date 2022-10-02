@@ -99,7 +99,7 @@ export default class KanbanBoard extends DisposableBase {
     this._disposabled.push(newPanel);
 
     newPanel.webview.html = await this.getHTML();
-    newPanel.iconPath = vscode.Uri.joinPath(this.mediaFolderUri, 'icon.png');
+    newPanel.iconPath = vscode.Uri.joinPath(this.mediaFolderUri, 'img/icon.png');
   }
 
   /**
@@ -128,14 +128,40 @@ export default class KanbanBoard extends DisposableBase {
       'light' :
       'dark';
 
+    const jsxFolderUri = vscode.Uri.joinPath(this.mediaFolderUri, "jsx");
+    const componentsFolderUri = vscode.Uri.joinPath(jsxFolderUri, "components");
+
     const rootUri = webview.asWebviewUri(this.mediaFolderUri);
-    const globalScriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this.mediaFolderUri, "main.js"));
-    const componentsUri = webview.asWebviewUri(vscode.Uri.joinPath(this.mediaFolderUri, "components"));
+    const componentsUri = webview.asWebviewUri(componentsFolderUri);
 
     const mainEJSUri = vscode.Uri.joinPath(this.mediaFolderUri, 'main.ejs');
     const mainEJS = Buffer.from(
       await fs.readFile(mainEJSUri)
     ).toString('utf8');
+
+    const jsxComponentUris: vscode.Uri[] = [];
+    {
+      const listOfJsxFoldersToScan: vscode.Uri[] = [
+        componentsFolderUri,
+        jsxFolderUri
+      ];
+
+      for (const jsxUri of listOfJsxFoldersToScan) {
+        for (const [item, type] of await fs.readDirectory(jsxUri)) {
+          if (type === vscode.FileType.Directory) {
+            continue;
+          }
+
+          if (item.endsWith('.jsx')) {
+            const fullUri = vscode.Uri.joinPath(jsxUri, item);
+
+            jsxComponentUris.push(
+              webview.asWebviewUri(fullUri)
+            );
+          }
+        }
+      }
+    }
 
     return ejs.render(
       mainEJS,
@@ -143,7 +169,7 @@ export default class KanbanBoard extends DisposableBase {
         colorMode,
         componentsUri: componentsUri.toString(),
         cspSource: webview.cspSource,
-        globalScriptUri: globalScriptUri.toString(),
+        jsxComponentUris: jsxComponentUris.map((jsxUri) => jsxUri.toString()),
         nonce,
         rootUri: rootUri.toString(),
         title: this.title

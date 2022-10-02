@@ -15,3 +15,40 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+* {
+  padding: 0;
+  margin: 0;
+}
+
+html {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+}
+
+#vscode-kanban-board .boardBody {
+  height: 100vh;
+  background-color: white !important;
+}
+
+#vscode-kanban-board .boardBody .cardColumns {
+  padding-top: 5rem;
+  padding-bottom: 1.5rem;
+}
+
+#vscode-kanban-board .boardBody .cardColumns .cardColumn {
+}
+
+#vscode-kanban-board .boardBody .cardColumns .cardColumn .cardList {
+  width: 100%;
+}
+
+#vscode-kanban-board .boardBody .cardColumns .cardColumn .cardList .card .card-body {
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}

@@ -24,14 +24,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- styles -->
+    <link href="<%- rootUri %>/css/normalize.css" rel="stylesheet">
+    <link href="<%- rootUri %>/css/fa-6.2.0.min.css" rel="stylesheet">
     <link href="<%- rootUri %>/css/bootstrap.min.css" rel="stylesheet">
     <link href="<%- rootUri %>/css/bootstrap-<%- colorMode %>.min.css" rel="stylesheet">
     <link href="<%- rootUri %>/css/main.css" rel="stylesheet">
-
-    <!-- React & Co. -->
-    <script nonce="<%- nonce %>" src="<%- rootUri %>/js/react.17.0.2.js"></script>
-    <script nonce="<%- nonce %>" src="<%- rootUri %>/js/react-dom.17.0.2.js"></script>
-    <script nonce="<%- nonce %>" src="<%- rootUri %>/js/babel.7.18.13.js"></script>
 
     <title><%= title %></title>
   </head>
@@ -40,9 +37,17 @@
     <div id="vscode-kanban-board"></div>
 
     <!-- scripts -->
-    <script nonce="<%- nonce %>" src="<%- globalScriptUri %>"></script>
+    <script nonce="<%- nonce %>" src="<%- rootUri %>/js/main.js"></script>
+    <script nonce="<%- nonce %>" src="<%- rootUri %>/js/main.<%- colorMode %>.js"></script>
 
     <!-- JSX components -->
-    <script nonce="<%- nonce %>" src="<%- componentsUri %>/board.jsx" type="text/babel"></script>
+    <% jsxComponentUris.forEach(function(jsxUri) { %>
+      <script nonce="<%- nonce %>" src="<%- jsxUri %>" type="text/babel"></script>
+    <% }); %>
+
+    <!-- React & Co. -->
+    <script nonce="<%- nonce %>" src="<%- rootUri %>/js/react.17.0.2.js"></script>
+    <script nonce="<%- nonce %>" src="<%- rootUri %>/js/react-dom.17.0.2.js"></script>
+    <script nonce="<%- nonce %>" src="<%- rootUri %>/js/babel.7.18.13.js"></script>
   </body>
 </html>

@@ -1,2 +1,5 @@
 Icons:
     - /icon.png + /media/icon.png (Erik Ragnar Eliasson; http://www.erikeliasson.io/)
+
+Fonts:
+    - /media/css/fa-* + /media/webfonts/fa-* (Font Awesome Free; https://fontawesome.com/)

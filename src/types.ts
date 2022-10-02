@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 /**
  * This file is part of the vscode-kanban distribution.
  * Copyright (c) Marcel Joachim Kloubert.
@@ -16,12 +17,100 @@
  */
 
 /**
+ * Makes a type, so it can also be `null`.
+ */
+export type CanBeNull<T = any> = T | null;
+
+/**
+ * Makes a type, so it can also be `null` or `undefined`.
+ */
+export type CanBeNullOrUndefined<T = any> = CanBeNull<T> | CanBeUndefined<T>;
+
+/**
+ * Makes a type, so it can also be `undefined`.
+ */
+export type CanBeUndefined<T = any> = T | undefined;
+
+/**
  * A board.
  */
 export interface IBoard {
-  "todo": [],
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  "in-progress": [],
-  "testing": [],
-  "done": []
+  /**
+   * Todo
+   */
+  "todo": IBoardCard[];
+  /**
+   * In Progress
+   */
+  "in-progress": IBoardCard[];
+  /**
+   * Testing
+   */
+  "testing": IBoardCard[];
+  /**
+   * Done
+   */
+  "done": IBoardCard[];
+}
+
+/**
+ * A board card.
+ */
+export interface IBoardCard {
+  /**
+   * The person, the card is assigned to.
+   */
+  "assignedTo"?: CanBeNullOrUndefined<IBoardPerson>;
+  /**
+   * The category.
+   */
+  "category"?: CanBeNullOrUndefined<string>;
+  /**
+   * The ISO timestamp, the card has been created.
+   */
+  "creation_time": string;
+  /**
+   * The description.
+   */
+  "description"?: CanBeNullOrUndefined<IBoardContent>;
+  /**
+   * The details.
+   */
+  "details"?: CanBeNullOrUndefined<IBoardContent>;
+  /**
+   * The ID.
+   */
+  "id": string;
+  /**
+   * The list of references to other cards.
+   */
+  "references"?: CanBeNullOrUndefined<string[]>;
+  /**
+   * The title.
+   */
+  "title": string;
+}
+
+/**
+ * A content inside the board.
+ */
+export interface IBoardContent {
+  /**
+   * The content or its Base64 representation.
+   */
+  "content": string;
+  /**
+   * The mime type.
+   */
+  "mime": string;
+}
+
+/**
+ * A person.
+ */
+export interface IBoardPerson {
+  /**
+   * The display/full name.
+   */
+  "name": string
 }
