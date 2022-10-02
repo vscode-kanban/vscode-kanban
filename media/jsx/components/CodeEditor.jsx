@@ -17,22 +17,42 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-(() => {
-  const KanbanBoard = () => {
-    const [Header, Body] = window.vscodeKanban.getUIComponents('Header', 'Body');
+ (() => {
+  window.vscodeKanban.setUIComponent('CodeEditor', ({
+    onChange,
+    value: initialValue
+  }) => {
+    const el = React.useRef(null);
+
+    const [value, setValue] = React.useState('');
 
     React.useEffect(() => {
-      // tell VSCode board has been rendered initially
-      postMsg('onPageLoaded');
+      onChange(value);
+    }, [value]);
+
+    React.useEffect(() => {
+      const editor = window.CodeMirror.fromTextArea(el.current, {
+        lineNumbers: true,
+        tabSize: 2,
+        value: initialValue,
+        mode: 'markdown'
+      });
+
+      editor.on('change', (cm) => {
+        setValue(String(cm.getValue() || ''));
+      });
+
+      editor.setSize("100%", 128);
+
+      setValue(initialValue);
+
+      return () => {
+        editor.toTextArea();
+      };
     }, []);
 
     return (
-        <React.Fragment>
-          <Header />
-          <Body />
-        </React.Fragment>
+      <textarea ref={el} />
     );
-  };
-  
-  ReactDOM.render(<KanbanBoard />, document.querySelector("#vscode-kanban-board"));
+  });
 })();

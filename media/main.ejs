@@ -30,6 +30,9 @@
     <!-- <link href="<%- rootUri %>/css/bootstrap-<%- colorMode %>.min.css" rel="stylesheet"> -->
     <link href="<%- rootUri %>/css/main.css" rel="stylesheet">
 
+    <!-- CodeMirror -->
+    <link href="<%- rootUri %>/css/codemirror-6.65.7.min.css" rel="stylesheet">
+
     <title><%= title %></title>
   </head>
 
@@ -38,6 +41,12 @@
 
     <!-- utils -->
     <script nonce="<%- nonce %>" src="<%- rootUri %>/js/lodash-4.17.21.min.js"></script>
+    <script nonce="<%- nonce %>" src="<%- rootUri %>/js/ajv7-8.11.0.bundle.min.js"></script>
+
+    <!-- CodeMirror -->
+    <script nonce="<%- nonce %>" src="<%- rootUri %>/js/codemirror-6.65.7.min.js"></script>
+    <script nonce="<%- nonce %>" src="<%- rootUri %>/js/codemirror/markdown-6.65.7.min.js"></script>
+    <script nonce="<%- nonce %>" src="<%- rootUri %>/js/codemirror/markdown-fold-6.65.7.min.js"></script>
 
     <!-- React & Co. -->
     <script nonce="<%- nonce %>" src="<%- rootUri %>/js/react-17.0.2.js"></script>

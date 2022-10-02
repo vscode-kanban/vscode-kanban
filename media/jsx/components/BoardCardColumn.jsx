@@ -87,6 +87,7 @@
         return (
           <BoardCardDialog
             mode="edit"
+            board={board}
             card={cardToEdit}
             show
             onClose={handleOnClose}
@@ -95,7 +96,7 @@
       }
   
       return null;
-    }, [cardToEdit]);
+    }, [board, cardToEdit]);
   
     return (
       <React.Fragment>
