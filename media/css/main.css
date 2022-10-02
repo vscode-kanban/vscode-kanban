@@ -36,11 +36,10 @@ body {
 }
 
 #vscode-kanban-board .boardBody .cardColumns {
-  padding-top: 5rem;
-  padding-bottom: 1.5rem;
-}
-
-#vscode-kanban-board .boardBody .cardColumns .cardColumn {
+  padding-top: 4.5rem;
+  padding-bottom: 1.0rem;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
 }
 
 #vscode-kanban-board .boardBody .cardColumns .cardColumn .cardList {
@@ -51,4 +50,28 @@ body {
   width: 100%;
   overflow-x: hidden;
   overflow-y: auto;
+}
+
+#vscode-kanban-board .boardCard {
+  margin-bottom: 1rem;
+}
+
+#vscode-kanban-board .boardCard .card-header .header {
+  width: 100%;
+  display: table !important;
+}
+
+#vscode-kanban-board .boardCard .card-header .header .left {
+  display: table-cell !important;
+}
+
+#vscode-kanban-board .boardCard .card-header .header .right {
+  display: table-cell !important;
+  text-align: right;
+  width: 100%;
+}
+
+#vscode-kanban-board .boardCard .card-header .header .right .cardAction {
+  cursor: pointer;
+  margin-left: 0.75rem;
 }

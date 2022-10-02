@@ -17,6 +17,21 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+window.vscode = acquireVsCodeApi();
+
+/**
+ * Posts a message back to VSCode.
+ *
+ * @param {String} type The type of the message. 
+ * @param {any} [data] The custom and optional data to send. 
+ */
+function postMsg(type, data) {
+  return window.vscode.postMessage({
+    type,
+    data
+  });
+}
+
 /**
  * Board settings and functions.
  */
@@ -33,6 +48,24 @@ window.vscodeKanban = {
  */
 window.vscodeKanban.getBGClass = function () {
   return `bg-${this.colorMode}`;
+};
+
+/**
+ * Returns a list of JSX components Bootstrap by name.
+ * 
+ * @param {String[]} [names] One or more name.
+ *
+ * @returns {React.FC[]} The list of component classes / functions.
+ */
+window.vscodeKanban.getBootstrapComponents = function (...names) {
+  const components = [];
+  for (const name of names) {
+    components.push(
+      window.ReactBootstrap[name]
+    );
+  }
+
+  return components;
 };
 
 /**
@@ -74,3 +107,25 @@ window.vscodeKanban.setUIComponent = function (name, Component) {
 
   window.vscodeKanban.ui.components[name] = MemorizedComponent;
 };
+
+// receive message from VSCode
+window.addEventListener('message', function (event) {
+  const message = event.data;
+
+  const { type, data } = message;
+
+  switch (type) {
+    case 'onBoardUpdated':
+      window.dispatchEvent(
+        new CustomEvent(type, {
+          detail: data
+        })
+      );
+      break;
+  }
+});
+
+// page has been loaded
+document.addEventListener('DOMContentLoaded', function () {
+  postMsg('onPageLoaded');
+}, false);

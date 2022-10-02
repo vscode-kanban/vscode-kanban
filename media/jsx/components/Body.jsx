@@ -18,12 +18,69 @@
  */
 
 window.vscodeKanban.setUIComponent('Body', () => {
-  const [ CardColumn ] = window.vscodeKanban.getUIComponents('CardColumn');
+  const [BoardCardColumn] = window.vscodeKanban.getUIComponents('BoardCardColumn');
+  const [Spinner] = window.vscodeKanban.getBootstrapComponents('Spinner');
 
-  // const [now, setNow] = React.useState("");
+  const [board, setBoard] = React.useState(null);
+
+  const handleBoardUpdate = React.useCallback(async ({ board: newBoard }) => {
+    await postMsg('onBoardUpdated', newBoard);
+
+    setBoard(newBoard);
+  }, []);
+
+  const renderContent = React.useCallback(() => {
+    if (board) {
+      return (
+        <div
+          className="row h-100 cardColumns"
+        >
+          <BoardCardColumn
+            title="Todo" headerColor="light"
+            board={board} cardGroup={'todo'}
+            onBoardUpdate={handleBoardUpdate}
+          />
+      
+          <BoardCardColumn
+            title="In Progress" headerColor="primary"
+            board={board} cardGroup={'in-progress'}
+            onBoardUpdate={handleBoardUpdate}
+          />
+
+          <BoardCardColumn
+            title="Testing" headerColor="warning"
+            board={board} cardGroup={'testing'}
+            onBoardUpdate={handleBoardUpdate}
+          />
+
+          <BoardCardColumn
+            title="Done" headerColor="success"
+            board={board} cardGroup={'done'}
+            onBoardUpdate={handleBoardUpdate}
+          />
+        </div>
+      );
+    } else {
+      return (
+        <div className="position-absolute top-50 start-50 translate-middle">
+          <Spinner animation="border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+        </div>
+      );
+    }
+  }, [board]);
 
   React.useEffect(() => {
-      // setNow(new Date().toISOString());
+    const handleBoardUpdated = function(e) {
+      setBoard(e.detail);
+    };
+
+    window.addEventListener("onBoardUpdated", handleBoardUpdated);
+
+    return () => {
+      window.removeEventListener("onBoardUpdated", handleBoardUpdated);
+    };
   }, []);
 
   return (
@@ -31,17 +88,7 @@ window.vscodeKanban.setUIComponent('Body', () => {
       className="container-fluid boardBody"
       style={{ backgroundColor: 'white' }}
     >
-      <div
-        className="row h-100 cardColumns"
-      >
-        <CardColumn title="Todo" headerColor="secondary" />
-    
-        <CardColumn title="In Progress" headerColor="primary" />
-
-        <CardColumn title="Testing" headerColor="warning" />
-
-        <CardColumn title="Done" headerColor="success" />
-      </div>
+      {renderContent()}
     </main>
   );
 });

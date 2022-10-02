@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+
 /**
  * This file is part of the vscode-kanban distribution.
  * Copyright (c) Marcel Joachim Kloubert.
@@ -20,8 +22,13 @@ import ejs from 'ejs';
 import vscode from "vscode";
 import type Workspace from "./workspace";
 import type { IWorkspaceBoardFile } from "./workspace";
-import type { IBoard } from "../types";
+import type { CanBeNullOrUndefined, IBoard } from "../types";
 import { getNonce } from "../utils";
+
+interface IKanbanBoardMessage<TData = any> {
+  type: string;
+  data: TData;
+}
 
 /**
  * Options for `KanbanBoard` class.
@@ -92,7 +99,8 @@ export default class KanbanBoard extends DisposableBase {
         enableFindWidget: true,
         localResourceRoots: [
           this.mediaFolderUri
-        ]
+        ],
+        retainContextWhenHidden: true
       }
     );
 
@@ -100,6 +108,8 @@ export default class KanbanBoard extends DisposableBase {
 
     newPanel.webview.html = await this.getHTML();
     newPanel.iconPath = vscode.Uri.joinPath(this.mediaFolderUri, 'img/icon.png');
+
+    newPanel.webview.onDidReceiveMessage(this.onDidReceiveMessage.bind(this));
   }
 
   /**
@@ -175,5 +185,55 @@ export default class KanbanBoard extends DisposableBase {
         title: this.title
       }
     );
+  }
+
+  private async loadBoardSafe(): Promise<IBoard> {
+    const { fs } = vscode.workspace;
+
+    let board: CanBeNullOrUndefined<IBoard>;
+
+    try {
+      board = JSON.parse(
+        Buffer.from(await fs.readFile(this.file.fileUri)).toString('utf8')
+      );
+    } catch (error) {
+      // TODO: log
+    }
+
+    return board || KanbanBoard.createEmpty();
+  }
+
+  private async onDidReceiveMessage(ev: IKanbanBoardMessage) {
+    const { fs } = vscode.workspace;
+
+    try {
+      switch (ev.type) {
+        case 'onBoardUpdated':
+          {
+            const newBoard = ev.data as IBoard;
+            const newBoardJSON = JSON.stringify(newBoard, null, 2);
+
+            await fs.writeFile(this.file.fileUri, Buffer.from(newBoardJSON, 'utf8'));
+          }
+          break;
+
+        case 'onPageLoaded':
+          {
+            await this.postMsg(
+              'onBoardUpdated',
+              await this.loadBoardSafe()
+            );
+          }
+          break;
+      }
+    } catch (error) {
+      // TODO: log
+    }
+  }
+
+  private postMsg(type: string, data?: any) {
+    return this._panel.webview.postMessage({
+      type, data
+    });
   }
 }

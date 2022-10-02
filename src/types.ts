@@ -89,6 +89,10 @@ export interface IBoardCard {
    * The title.
    */
   "title": string;
+  /**
+   * The type.
+   */
+  "type"?: CanBeNullOrUndefined<"bug" | "emergency" | "note">;
 }
 
 /**

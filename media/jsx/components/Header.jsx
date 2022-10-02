@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-window.vscodeKanban.setUIComponent('Header', (props) => {
+window.vscodeKanban.setUIComponent('Header', () => {
   // const [now, setNow] = React.useState("");
 
   React.useEffect(() => {
@@ -27,31 +27,31 @@ window.vscodeKanban.setUIComponent('Header', (props) => {
   return (
     <nav className={`navbar ${window.vscodeKanban.getBGClass()} header fixed-top`}>
       <div className="container-fluid">
-        <a className={`navbar-brand ${window.vscodeKanban.getTextClass()}`} href="#">
+        <a className={`navbar-brand text-white`} href="#">
           Kanban Board
         </a>
 
         <div className="d-flex justify-content-end">
           {/* filter */}
-          <button type="button" class="btn btn-sm btn-primary ms-1">
+          <button type="button" className="btn btn-sm btn-primary ms-1">
             <i className="fa fa-filter"></i>
           </button>
           {/* refresh */}
-          <button type="button" class="btn btn-sm btn-secondary ms-1">
-            <i class="fa fa-arrows-rotate"></i>
+          <button type="button" className="btn btn-sm btn-secondary ms-1">
+            <i className="fa fa-arrows-rotate"></i>
           </button>
           {/* save */}
-          <button type="button" class="btn btn-sm btn-secondary ms-1">
-            <i class="fa fa-floppy-disk"></i>
+          <button type="button" className="btn btn-sm btn-secondary ms-1">
+            <i className="fa fa-floppy-disk"></i>
           </button>
 
           {/* GitHub repository */}
-          <button type="button" class="btn btn-sm btn-dark ms-4">
-            <i class="fa-brands fa-github"></i>
+          <button type="button" className="btn btn-sm btn-dark ms-4">
+            <i className="fa-brands fa-github"></i>
           </button>
           {/* Author's homepage */}
-          <button type="button" class="btn btn-sm btn-dark ms-1">
-            <i class="fa fa-earth-europe"></i>
+          <button type="button" className="btn btn-sm btn-dark ms-1">
+            <i className="fa fa-earth-europe"></i>
           </button>
         </div>
       </div>
