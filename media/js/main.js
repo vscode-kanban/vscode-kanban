@@ -124,8 +124,3 @@ window.addEventListener('message', function (event) {
       break;
   }
 });
-
-// page has been loaded
-document.addEventListener('DOMContentLoaded', function () {
-  postMsg('onPageLoaded');
-}, false);

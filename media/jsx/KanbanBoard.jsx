@@ -17,21 +17,21 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-const KanbanBoard = () => {
-  const [ Header, Body ] = window.vscodeKanban.getUIComponents('Header', 'Body');
+(() => {
+  const KanbanBoard = () => {
+    const [Header, Body] = window.vscodeKanban.getUIComponents('Header', 'Body');
+
+    React.useEffect(() => {
+      postMsg('onPageLoaded');
+    }, []);
+
+    return (
+        <React.Fragment>
+          <Header />
+          <Body />
+        </React.Fragment>
+    );
+  };
   
-  // const [now, setNow] = React.useState("");
-
-  React.useEffect(() => {
-      // setNow(new Date().toISOString());
-  }, []);
-
-  return (
-      <React.Fragment>
-        <Header />
-        <Body />
-      </React.Fragment>
-  );
-};
-
-ReactDOM.render(<KanbanBoard />, document.querySelector("#vscode-kanban-board"));
+  ReactDOM.render(<KanbanBoard />, document.querySelector("#vscode-kanban-board"));
+})();
