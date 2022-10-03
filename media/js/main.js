@@ -75,6 +75,9 @@ window.vscodeKanban.assignCardData = function (card, data) {
   if (data.id) {
     card.id = String(data.id);
   }
+  if (data.creation_time) {
+    card.creation_time = String(data.creation_time);
+  }
 
   return card;
 };

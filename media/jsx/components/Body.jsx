@@ -27,8 +27,8 @@
     const handleBoardUpdate = React.useCallback(async ({ board: newBoard }) => {
       await postMsg('onBoardUpdated', newBoard);
 
-      setBoard(newBoard);
       window.vscodeKanban.board = newBoard;
+      setBoard(newBoard);
     }, []);
   
     const renderContent = React.useCallback(() => {
@@ -41,6 +41,7 @@
               title="Todo" headerColor="light"
               board={board} cardGroup={'todo'}
               onBoardUpdate={handleBoardUpdate}
+              showAddButton
             />
         
             <BoardCardColumn
@@ -59,6 +60,7 @@
               title="Done" headerColor="success"
               board={board} cardGroup={'done'}
               onBoardUpdate={handleBoardUpdate}
+              showClearButton
             />
           </div>
         );

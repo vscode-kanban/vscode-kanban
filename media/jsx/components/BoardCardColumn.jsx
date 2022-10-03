@@ -23,18 +23,29 @@
     cardGroup,
     headerColor,
     onBoardUpdate,
+    showAddButton,
+    showClearButton,
     title
   }) => {
-    const [BoardCard, BoardCardDialog] = window.vscodeKanban.getUIComponents('BoardCard', 'BoardCardDialog');
+    const [BoardCard, BoardCardDialog, ConfirmDialog] = window.vscodeKanban.getUIComponents('BoardCard', 'BoardCardDialog', 'ConfirmDialog');
     const [Card] = window.vscodeKanban.getBootstrapComponents('Card');
 
+    const { t } = window;
+
+    const [cardToDelete, setCardToDelete] = React.useState(null);
     const [cardToEdit, setCardToEdit] = React.useState(null);
     const [showNewCardDialog, setShowNewCardDialog] = React.useState(false);
-  
+    const [showClearColumnDialog, setShowClearColumnDialog] = React.useState(false);
+
     // sorted list of cards
     const cards = React.useMemo(() => {
       return _(board[cardGroup])
         .sortBy((item) => {
+          // first sort by prio (DESC)
+          return (isNaN(item.prio) ? 0 : item.prio) * -1;
+        }, (item) => {
+          // then by type
+
           const type = String(item.type || '').toLowerCase().trim();
           if (['emergency'].includes(type)) {
             return Number.MIN_SAFE_INTEGER;
@@ -43,6 +54,9 @@
           }
   
           return Number.MAX_SAFE_INTEGER;
+        }, (item) => {
+          // then by title (case-insensitive)
+          return String(item.title || '').toLowerCase().trim();
         })
         .value();
     }, [board, cardGroup]);
@@ -76,6 +90,7 @@
     }, []);
   
     const handleCardDelete = React.useCallback((card) => {
+      setCardToDelete(card);
     }, []);
 
     const handleBoardUpdate = React.useCallback(() => {
@@ -88,8 +103,16 @@
     }, [board, cardGroup, onBoardUpdate]);
 
     const handleAddCardClick = React.useCallback(() => {
-      setShowNewCardDialog(true);
-    }, []);
+      if (showAddButton) {
+        setShowNewCardDialog(true);
+      }
+    }, [showAddButton]);
+
+    const handleClearColumnClick = React.useCallback(() => {
+      if (showClearButton) {
+        setShowClearColumnDialog(true);
+      }
+    }, [showClearButton]);
 
     const renderTitle = React.useCallback(() => {
       return (
@@ -102,15 +125,45 @@
     const renderActionButtons = React.useCallback(() => {
       return (
         <div className="d-flex justify-content-end right">
-          <i
-            className="fa fa-plus cardColumnAction"
-            onClick={handleAddCardClick}
-          />
+          {showAddButton && (
+            <i
+              className="fa fa-plus cardColumnAction"
+              onClick={handleAddCardClick}
+            />
+          )}
+
+          {showClearButton && (
+            <i
+              className="fa fa-broom cardColumnAction"
+              onClick={handleClearColumnClick}
+            />
+          )}
         </div>
       );
-    }, [handleAddCardClick]);
+    }, [handleAddCardClick, showAddButton, showClearButton]);
   
     const renderDialog = React.useCallback(() => {
+      if (showClearColumnDialog) {
+        const handleOnClose = (yesButtonClicked) => {
+          setShowClearColumnDialog(false);
+
+          if (yesButtonClicked === true) {
+            board[cardGroup] = [];
+
+            handleBoardUpdate();
+          }
+        };
+
+        return (
+          <ConfirmDialog
+            onClose={handleOnClose}
+            show
+            title={t('clear_card_list_dialog.title')}
+            body={t('clear_card_list_dialog.body')}
+          />
+        );
+      }
+
       if (showNewCardDialog) {
         const handleOnClose = (newCardData) => {
           setShowNewCardDialog(false);
@@ -137,13 +190,13 @@
 
       if (cardToEdit) {
         const handleOnClose = (updatedCardData) => {
-          setCardToEdit(null);
-
           if (updatedCardData) {
             window.vscodeKanban.assignCardData(cardToEdit, updatedCardData);
 
             handleBoardUpdate();
           }
+
+          setCardToEdit(null);
         };
   
         return (
@@ -156,9 +209,32 @@
           />
         );
       }
+
+      if (cardToDelete) {
+        const handleOnClose = (yesButtonClicked) => {
+          if (yesButtonClicked === true) {
+            for (const [boardGroup, groupCards] of Object.entries(board)) {
+              board[boardGroup] = groupCards.filter((card) => card.id !== cardToDelete.id);
+            }
+
+            handleBoardUpdate();
+          }
+
+          setCardToDelete(null);
+        };
+
+        return (
+          <ConfirmDialog
+            onClose={handleOnClose}
+            show
+            title={t('delete_card_dialog.title', { title: cardToDelete.title })}
+            body={t('delete_card_dialog.body')}
+          />
+        );
+      }
   
       return null;
-    }, [board, cardToEdit, handleBoardUpdate, showNewCardDialog]);
+    }, [board, cardToDelete, cardToEdit, handleBoardUpdate, showClearColumnDialog, showNewCardDialog, t]);
   
     return (
       <React.Fragment>

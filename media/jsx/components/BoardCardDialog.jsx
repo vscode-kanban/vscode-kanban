@@ -92,6 +92,9 @@
       onClose({
         assignedTo: assignedTo.trim() || null,
         category: category.trim() || null,
+        creation_time: mode === 'create' ?
+          new Date().toISOString() :
+          undefined,
         description: description.trim() || null,
         details: details.trim() || null,
         id: mode === 'create' ?

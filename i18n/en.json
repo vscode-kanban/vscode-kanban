@@ -1,10 +1,20 @@
 {
+  "clear_card_list_dialog": {
+    "title": "Clear card list",
+    "body": "Do you really want to clear the list of cards?"
+  },
   "close": "Close",
   "create": "Create",
   "create_card": "Create new card '{{title}}'",
+  "delete_card_dialog": {
+    "title": "Delete card '{{title}}'",
+    "body": "Do you really want to delete this card?"
+  },
   "edit_card": "Edit card '{{title}}'",
   "errors": {
     "no_board_compatible_workspace_found": "There is currently no workspace, which can be used with a Kanban board!"
   },
-  "save": "Save"
+  "no": "No",
+  "save": "Save",
+  "yes": "Yes"
 }
