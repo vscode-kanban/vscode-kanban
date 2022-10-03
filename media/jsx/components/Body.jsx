@@ -26,8 +26,9 @@
   
     const handleBoardUpdate = React.useCallback(async ({ board: newBoard }) => {
       await postMsg('onBoardUpdated', newBoard);
-  
+
       setBoard(newBoard);
+      window.vscodeKanban.board = newBoard;
     }, []);
   
     const renderContent = React.useCallback(() => {

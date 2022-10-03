@@ -70,16 +70,16 @@
         <div className="d-flex justify-content-end right">
           <i
             className="fa fa-pen-to-square cardAction"
-            onClick={onEditClick}
+            onClick={() => { onEditClick(card); }}
           />
   
           <i
             className="fa fa-trash cardAction"
-            onClick={onDeleteClick}
+            onClick={() => { onDeleteClick(card); }}
           />
         </div>
       );
-    }, [onDeleteClick, onEditClick]);
+    }, [card, onDeleteClick, onEditClick]);
   
     const handleDragStart = React.useCallback((ev) => {
       ev.dataTransfer.setData("text", String(card.id));

@@ -66,9 +66,6 @@
     const [Modal, Button, Form, Row, Col, Alert, Tabs, Tab, ListGroup] = window.vscodeKanban.getBootstrapComponents(
       'Modal', 'Button', 'Form', 'Row', 'Col', 'Alert', 'Tabs', 'Tab', 'ListGroup'
     );
-    const [CodeEditor] = window.vscodeKanban.getUIComponents(
-      'CodeEditor'
-    );
 
     const [activeTab, setActiveTab] = React.useState('shortDescription');
     const [assignedTo, setAssignedTo] = React.useState('');
@@ -86,8 +83,26 @@
     }, [onClose]);
 
     const handleSave = React.useCallback(() => {
-      onClose();
-    }, [onClose]);
+      if (validationError?.length) {
+        return;
+      }
+
+      const prioValue = parseFloat(prio.trim());
+
+      onClose({
+        assignedTo: assignedTo.trim() || null,
+        category: category.trim() || null,
+        description: description.trim() || null,
+        details: details.trim() || null,
+        id: mode === 'create' ?
+          window.vscodeKanban.findNextCardId(board) :
+          undefined,
+        prio: isNaN(prioValue) ? null : prioValue,
+        references: selectedReferences,
+        title: title.trim(),
+        type: type.trim() || null,
+      });
+    }, [assignedTo, board, category, description, details, mode, onClose, prio, selectedReferences, title, type, validationError]);
 
     const headerClasses = React.useMemo(() => {  
       const classes = [];
@@ -103,13 +118,19 @@
     }, [type]);
 
     const otherCards = React.useMemo(() => {
-      return _(Object.values(board))
+      let listOfOtherCards = _(window.vscodeKanban.getAllCards(board))
         .sortBy((item) => {
           return String(item.title || '').toLowerCase().trim();
         })
         .value()
-        .flat()
-        .filter((item) => item.id !== card.id);
+        .flat();
+
+      if (card) {
+        listOfOtherCards = listOfOtherCards
+          .filter((item) => item.id !== card.id);
+      }
+
+      return listOfOtherCards;
     }, [board, card]);
 
     const hasOtherCards = React.useMemo(() => {
@@ -118,9 +139,11 @@
 
     const renderTitle = React.useCallback(() => {
       if (mode === 'edit') {
-        return `Edit card '${title}'`;
+        return t('edit_card', { title });
+      } else if (mode === 'create') {
+        return t('create_card', title, { title });
       }
-    }, [mode, title]);
+    }, [mode, title, t]);
 
     const renderValidationError = React.useCallback(() => {
       if (validationError) {
@@ -303,17 +326,19 @@
                     onSelect={(eventKey) => { setActiveTab(eventKey); }}
                   >
                     <Tab eventKey="shortDescription" title="(Short) Description">
-                      {activeTab === 'shortDescription' && (<CodeEditor
+                      <Form.Control
+                        as="textarea" rows={5}
                         value={description}
-                        onChange={setDescription}
-                      />)}
+                        onChange={(ev) => { setDescription(ev.target.value); }}
+                      />
                     </Tab>
 
                     <Tab eventKey="details" title="Details">
-                      {activeTab === 'details' && (<CodeEditor
+                      <Form.Control
+                        as="textarea" rows={5}
                         value={details}
-                        onChange={setDetails}
-                      />)}
+                        onChange={(ev) => { setDetails(ev.target.value); }}
+                      />
                     </Tab>
 
                     <Tab
@@ -338,7 +363,7 @@
               onClick={handleSave}
               disabled={!!validationError.length}
             >
-              {t('save')}
+              {mode === 'create' ? t('create') : t('save')}
             </Button>
           </Modal.Footer>
         </Modal>

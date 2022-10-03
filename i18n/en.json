@@ -1,5 +1,8 @@
 {
   "close": "Close",
+  "create": "Create",
+  "create_card": "Create new card '{{title}}'",
+  "edit_card": "Edit card '{{title}}'",
   "errors": {
     "no_board_compatible_workspace_found": "There is currently no workspace, which can be used with a Kanban board!"
   },

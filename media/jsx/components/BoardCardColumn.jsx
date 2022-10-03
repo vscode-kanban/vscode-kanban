@@ -29,6 +29,7 @@
     const [Card] = window.vscodeKanban.getBootstrapComponents('Card');
 
     const [cardToEdit, setCardToEdit] = React.useState(null);
+    const [showNewCardDialog, setShowNewCardDialog] = React.useState(false);
   
     // sorted list of cards
     const cards = React.useMemo(() => {
@@ -51,8 +52,7 @@
   
       // find card by ID
       const cardId = ev.dataTransfer.getData("text");
-      const matchingCards = Object.values(board)
-        .flat()
+      const matchingCards = window.vscodeKanban.getAllCards(board)
         .filter((item) => item.id === cardId);
   
       // create a new board
@@ -77,11 +77,73 @@
   
     const handleCardDelete = React.useCallback((card) => {
     }, []);
+
+    const handleBoardUpdate = React.useCallback(() => {
+      onBoardUpdate({
+        group: cardGroup,
+        board: {
+          ...board
+        },
+      });
+    }, [board, cardGroup, onBoardUpdate]);
+
+    const handleAddCardClick = React.useCallback(() => {
+      setShowNewCardDialog(true);
+    }, []);
+
+    const renderTitle = React.useCallback(() => {
+      return (
+        <div className="d-flex justify-content-start left">
+          {title}
+        </div>
+      );
+    }, [title]);
+
+    const renderActionButtons = React.useCallback(() => {
+      return (
+        <div className="d-flex justify-content-end right">
+          <i
+            className="fa fa-plus cardColumnAction"
+            onClick={handleAddCardClick}
+          />
+        </div>
+      );
+    }, [handleAddCardClick]);
   
     const renderDialog = React.useCallback(() => {
+      if (showNewCardDialog) {
+        const handleOnClose = (newCardData) => {
+          setShowNewCardDialog(false);
+
+          if (newCardData) {
+            const newCard = {};
+            window.vscodeKanban.assignCardData(newCard, newCardData);
+
+            board[cardGroup].push(newCard);
+
+            handleBoardUpdate();
+          }
+        };
+  
+        return (
+          <BoardCardDialog
+            mode="create"
+            board={board}
+            show
+            onClose={handleOnClose}
+          />
+        );
+      }
+
       if (cardToEdit) {
-        const handleOnClose = () => {
+        const handleOnClose = (updatedCardData) => {
           setCardToEdit(null);
+
+          if (updatedCardData) {
+            window.vscodeKanban.assignCardData(cardToEdit, updatedCardData);
+
+            handleBoardUpdate();
+          }
         };
   
         return (
@@ -96,7 +158,7 @@
       }
   
       return null;
-    }, [board, cardToEdit]);
+    }, [board, cardToEdit, handleBoardUpdate, showNewCardDialog]);
   
     return (
       <React.Fragment>
@@ -110,9 +172,9 @@
               className="mw-100 h-100"
             >
               <Card.Header
-                className={`text-bg-${headerColor}`}
+                className={`text-bg-${headerColor} header`}
               >
-                {title}
+                {renderTitle()} {renderActionButtons()}
               </Card.Header>
   
               <Card.Body
@@ -125,8 +187,8 @@
                     <BoardCard
                       key={`boardcard-${card.id}-${cardIndex}`}
                       card={card}
-                      onEditClick={() => { handleCardEdit(card); }}
-                      onDeleteClick={() => { handleCardDelete(card); }}
+                      onEditClick={handleCardEdit}
+                      onDeleteClick={handleCardDelete}
                     />
                   );
                 })}

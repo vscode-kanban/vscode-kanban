@@ -75,3 +75,24 @@ body {
   cursor: pointer;
   margin-left: 0.75rem;
 }
+
+
+#vscode-kanban-board .cardColumns .cardColumn .card-header.header {
+  width: 100%;
+  display: table !important;
+}
+
+#vscode-kanban-board .cardColumns .cardColumn .card-header.header .left {
+  display: table-cell !important;
+  width: 100%;
+}
+
+#vscode-kanban-board .cardColumns .cardColumn .card-header.header .right {
+  display: table-cell !important;
+  text-align: right;
+}
+
+#vscode-kanban-board .cardColumns .cardColumn .card-header.header .right .cardColumnAction {
+  cursor: pointer;
+  margin-left: 0.75rem;
+}

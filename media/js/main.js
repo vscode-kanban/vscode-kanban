@@ -45,6 +45,73 @@ window.vscodeKanban = {
 };
 
 /**
+ * Assigns card data to an object.
+ *
+ * @param {Object} card The target (card) object. 
+ * @param {Object} data The data to assign.
+ *
+ * @returns {Object} The object with the assigned data.
+ */
+window.vscodeKanban.assignCardData = function (card, data) {
+  card.assignedTo = data.assignedTo ? {
+    name: data.assignedTo,
+  } : null;
+  card.category = data.category;
+  card.description = data.description ? {
+    content: data.description,
+    mime: 'text/markdown',
+  } : null;
+  card.details = data.details ? {
+    content: data.details,
+    mime: 'text/markdown',
+  } : null;
+  card.prio = data.prio || 0;
+  card.references = data.references?.length ?
+    [...data.references] :
+    null;
+  card.title = data.title;
+  card.type = data.type;
+
+  if (data.id) {
+    card.id = String(data.id);
+  }
+
+  return card;
+};
+
+/**
+ * Finds the next, unused numeric ID inside a board.
+ *
+ * @param {Object} board The board.
+ *
+ * @returns {String} The next ID.
+ */
+window.vscodeKanban.findNextCardId = function (board) {
+  const numericIds = this.getAllCards(board)
+    .map((card) => parseInt(String(card.id).trim(), 10))
+    .filter((id) => !isNaN(id));
+
+  let lastId = 0;
+  if (numericIds.length) {
+    lastId = Math.max(...numericIds);
+  }
+
+  return String(lastId + 1);
+};
+
+/**
+ * Returns a flat list of all cards of a board.
+ *
+ * @param {Object} board The board.
+ *
+ * @returns {Object[]} The flat list of cards.
+ */
+window.vscodeKanban.getAllCards = function (board) {
+  return Object.values(board || {})
+    .flat();
+};
+
+/**
  * Gets the background class based on the color mode.
  *
  * @returns {String} The class name.
