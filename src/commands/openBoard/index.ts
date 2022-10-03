@@ -61,45 +61,50 @@ const factory: CommandFactory = () => {
 
           const { file } = selectedItem;
           // folder
-          try {
-            await fs.stat(file.folderUri);
-          } catch (error) {
-            if (error instanceof vscode.FileSystemError) {
-              if (error.code !== 'FileNotFound') {
-                throw error;
-              }
-            }
+          await (async () => {
+            try {
+              await fs.stat(file.folderUri);
+            } catch (error) {
+              if (error instanceof vscode.FileSystemError) {
+                if (error.code === 'FileNotFound') {
+                  // try create directory
 
-            if (fs.isWritableFileSystem(file.folderUri.scheme)) {
-              // try create directory
-              await fs.createDirectory(file.folderUri);
-            } else {
-              throw vscode.FileSystemError.NoPermissions(file.folderUri);
+                  if (fs.isWritableFileSystem(file.folderUri.scheme)) {
+                    return await fs.createDirectory(file.folderUri);
+                  } else {
+                    throw vscode.FileSystemError.NoPermissions(file.folderUri);
+                  }
+                }
+              }
+
+              throw error;
             }
-          }
+          })();
           // file
-          try {
-            await fs.stat(file.fileUri);
-          } catch (error) {
-            if (error instanceof vscode.FileSystemError) {
-              if (error.code !== 'FileNotFound') {
-                throw error;
+          await (async () => {
+            try {
+              await fs.stat(file.fileUri);
+            } catch (error) {
+              if (error instanceof vscode.FileSystemError) {
+                if (error.code === 'FileNotFound') {
+                  // try create empty file
+
+                  if (fs.isWritableFileSystem(file.fileUri.scheme)) {
+                    return await fs.writeFile(
+                      file.fileUri,
+                      Buffer.from(JSON.stringify(
+                        KanbanBoard.createEmpty()
+                      ), 'utf8')
+                    );
+                  } else {
+                    throw vscode.FileSystemError.NoPermissions(file.fileUri);
+                  }
+                }
               }
-            }
 
-            if (fs.isWritableFileSystem(file.fileUri.scheme)) {
-              // try create empty file
-
-              await fs.writeFile(
-                file.fileUri,
-                Buffer.from(JSON.stringify(
-                  KanbanBoard.createEmpty()
-                ), 'utf8')
-              );
-            } else {
-              throw vscode.FileSystemError.NoPermissions(file.fileUri);
+              throw error;
             }
-          }
+          })();
 
           const newBoard = new KanbanBoard({
             file: selectedItem.file,
