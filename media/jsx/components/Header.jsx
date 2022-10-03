@@ -19,10 +19,21 @@
 
 (() => {
   window.vscodeKanban.setUIComponent('Header', () => {
-    const [Navbar, Container, Button] = window.vscodeKanban.getBootstrapComponents('Navbar', 'Container', 'Button');
-
+    const [board, setBoard] = React.useState(null);
     const [icon, setIcon] = React.useState(null);
     const [projectName, setProjectName] = React.useState(null);
+
+    const handleRefresh = React.useCallback(() => {
+      postMsg('requestBoardUpdate');
+    }, []);
+
+    const handleSave = React.useCallback(() => {
+      if (!board) {
+        return;
+      }
+
+      postMsg('onBoardUpdated', board);
+    }, [board]);
 
     const renderNavBrand = React.useCallback(() => {
       let title = 'Kanban Board';
@@ -48,15 +59,21 @@
     }, [icon, projectName]);
 
     React.useEffect(() => {
+      const handleBoardUpdated = function(e) {
+        setBoard(e.detail);
+      };
+
       const handleEnvironmentUpdated = function(e) {
         setIcon(e.detail.icon);
         setProjectName(e.detail.projectName);
       };
   
       window.addEventListener("onEnvironmentUpdated", handleEnvironmentUpdated);
+      window.addEventListener("onBoardUpdated", handleBoardUpdated);
   
       return () => {
         window.removeEventListener("onEnvironmentUpdated", handleEnvironmentUpdated);
+        window.removeEventListener("onBoardUpdated", handleBoardUpdated);
       };
     }, []);
 
@@ -69,15 +86,21 @@
   
           <div className="d-flex justify-content-end">
             {/* filter */}
-            <button type="button" className="btn btn-sm btn-primary ms-1">
+            <button type="button" className="btn btn-sm btn-primary ms-1" disabled={!board}>
               <i className="fa fa-filter"></i>
             </button>
             {/* refresh */}
-            <button type="button" className="btn btn-sm btn-secondary ms-1">
+            <button
+              type="button" className="btn btn-sm btn-secondary ms-1"
+              onClick={handleRefresh} disabled={!board}
+            >
               <i className="fa fa-arrows-rotate"></i>
             </button>
             {/* save */}
-            <button type="button" className="btn btn-sm btn-secondary ms-1">
+            <button
+              type="button" className="btn btn-sm btn-secondary ms-1"
+              onClick={handleSave} disabled={!board}
+            >
               <i className="fa fa-floppy-disk"></i>
             </button>
   

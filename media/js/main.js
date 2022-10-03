@@ -37,6 +37,7 @@ function postMsg(type, data) {
  * Board settings and functions.
  */
 window.vscodeKanban = {
+  board: null,
   ui: {
     components: {},
     icon: null
@@ -133,6 +134,8 @@ window.addEventListener('message', async function (event) {
 
     case 'onBoardUpdated':
       {
+        window.vscodeKanban.board = data;
+
         window.dispatchEvent(
           new CustomEvent(type, {
             detail: data

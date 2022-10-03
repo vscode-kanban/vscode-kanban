@@ -220,22 +220,23 @@ export default class KanbanBoard extends DisposableBase {
   }
 
   private async onDidReceiveMessage(ev: IKanbanBoardMessage) {
-    const { fs } = vscode.workspace;
-
     try {
       switch (ev.type) {
         case 'onBoardUpdated':
           {
-            const newBoard = ev.data as IBoard;
-            const newBoardJSON = JSON.stringify(newBoard, null, 2);
-
-            await fs.writeFile(this.file.fileUri, Buffer.from(newBoardJSON, 'utf8'));
+            await this.saveBoard(ev.data as IBoard);
           }
           break;
 
         case 'onPageLoaded':
           {
             await this.sendUpdateEnvironmentRequest();
+            await this.sendBoardUpdatedEvent();
+          }
+          break;
+
+        case 'requestBoardUpdate':
+          {
             await this.sendBoardUpdatedEvent();
           }
           break;
@@ -249,6 +250,18 @@ export default class KanbanBoard extends DisposableBase {
     return this._panel.webview.postMessage({
       type, data
     });
+  }
+
+  private async saveBoard(board: IBoard) {
+    const { fs } = vscode.workspace;
+
+    const boardJSON = JSON.stringify(board, null, 2);
+
+    if (fs.isWritableFileSystem(this.file.fileUri.scheme)) {
+      await fs.writeFile(this.file.fileUri, Buffer.from(boardJSON, 'utf8'));
+    } else {
+      throw vscode.FileSystemError.NoPermissions(this.file.fileUri);
+    }
   }
 
   private async sendBoardUpdatedEvent() {

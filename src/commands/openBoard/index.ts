@@ -63,22 +63,42 @@ const factory: CommandFactory = () => {
           // folder
           try {
             await fs.stat(file.folderUri);
-          } catch {
-            // try create directory
-            await fs.createDirectory(file.folderUri);
+          } catch (error) {
+            if (error instanceof vscode.FileSystemError) {
+              if (error.code !== 'FileNotFound') {
+                throw error;
+              }
+            }
+
+            if (fs.isWritableFileSystem(file.folderUri.scheme)) {
+              // try create directory
+              await fs.createDirectory(file.folderUri);
+            } else {
+              throw vscode.FileSystemError.NoPermissions(file.folderUri);
+            }
           }
           // file
           try {
             await fs.stat(file.fileUri);
-          } catch {
-            // create empty file
+          } catch (error) {
+            if (error instanceof vscode.FileSystemError) {
+              if (error.code !== 'FileNotFound') {
+                throw error;
+              }
+            }
 
-            await fs.writeFile(
-              file.fileUri,
-              Buffer.from(JSON.stringify(
-                KanbanBoard.createEmpty()
-              ), 'utf8')
-            );
+            if (fs.isWritableFileSystem(file.fileUri.scheme)) {
+              // try create empty file
+
+              await fs.writeFile(
+                file.fileUri,
+                Buffer.from(JSON.stringify(
+                  KanbanBoard.createEmpty()
+                ), 'utf8')
+              );
+            } else {
+              throw vscode.FileSystemError.NoPermissions(file.fileUri);
+            }
           }
 
           const newBoard = new KanbanBoard({
