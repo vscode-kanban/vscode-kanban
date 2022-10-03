@@ -17,13 +17,15 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import AppContext from "./appContext";
 import DisposableBase from "./disposableBase";
 import ejs from 'ejs';
 import vscode from "vscode";
 import type Workspace from "./workspace";
+import { getNonce } from "../utils";
 import type { IWorkspaceBoardFile } from "./workspace";
 import type { CanBeNullOrUndefined, IBoard } from "../types";
-import { getNonce } from "../utils";
+import { kanbanBasename } from "../constants";
 
 interface IKanbanBoardMessage<TData = any> {
   type: string;
@@ -56,6 +58,13 @@ export default class KanbanBoard extends DisposableBase {
   }
 
   /**
+   * Get the underlying app.
+   */
+  get app(): AppContext {
+    return this.options.file.workspace.app;
+  }
+
+  /**
    * Creates an empty instance.
    *
    * @returns {IBoard} The new instance.
@@ -81,13 +90,22 @@ export default class KanbanBoard extends DisposableBase {
    * Returns the root URI of the media folder.
    */
   get mediaFolderUri(): vscode.Uri {
-    return this.file.workspace.app.mediaFolderUri;
+    return this.app.mediaFolderUri;
   }
 
   /**
    * Opens the board.
    */
   async open() {
+    const localResourceRoots: vscode.Uri[] = [
+      this.mediaFolderUri
+    ];
+
+    const kanbanFolderUri = this.file.folderUri;
+    if (kanbanFolderUri.scheme === 'file') {
+      localResourceRoots.push(kanbanFolderUri);
+    }
+
     const newPanel = this._panel = vscode.window.createWebviewPanel(
       'vscodeKanbanBoard',
       this.title,
@@ -97,9 +115,7 @@ export default class KanbanBoard extends DisposableBase {
         enableForms: true,
         enableScripts: true,
         enableFindWidget: true,
-        localResourceRoots: [
-          this.mediaFolderUri
-        ],
+        localResourceRoots,
         retainContextWhenHidden: true
       }
     );
@@ -219,10 +235,8 @@ export default class KanbanBoard extends DisposableBase {
 
         case 'onPageLoaded':
           {
-            await this.postMsg(
-              'onBoardUpdated',
-              await this.loadBoardSafe()
-            );
+            await this.sendUpdateEnvironmentRequest();
+            await this.sendBoardUpdatedEvent();
           }
           break;
       }
@@ -235,5 +249,51 @@ export default class KanbanBoard extends DisposableBase {
     return this._panel.webview.postMessage({
       type, data
     });
+  }
+
+  private async sendBoardUpdatedEvent() {
+    return this.postMsg(
+      'onBoardUpdated',
+      await this.loadBoardSafe()
+    );
+  }
+
+  private async sendUpdateEnvironmentRequest() {
+    const { fs } = vscode.workspace;
+
+    let iconUri: vscode.Uri = vscode.Uri.joinPath(this.mediaFolderUri, "img/icon.png");
+    try {
+      const items = await fs.readDirectory(this.file.folderUri);
+
+      const customIcon = items.find(([name, type]) => {
+        return type !== vscode.FileType.Directory &&
+          [
+            `${kanbanBasename}png`,
+            `${kanbanBasename}jpg`,
+            `${kanbanBasename}jpeg`,
+            `${kanbanBasename}gif`
+          ].includes(name);
+      });
+
+      if (customIcon) {
+        const [customIconName] = customIcon;
+
+        iconUri = vscode.Uri.joinPath(this.file.folderUri, customIconName);
+      }
+    } catch { }
+
+    const tSettings = this.app.tSettings;
+
+    const data: any = {
+      i18n: tSettings ? {
+        supportedLngs: tSettings.supportedLngs,
+        resources: tSettings.resources,
+        fallbackLng: tSettings.fallbackLng,
+      } : null,
+      icon: this._panel.webview.asWebviewUri(iconUri).toString(),
+      projectName: String(this.file.workspace.folder.name || '').trim()
+    };
+
+    return this.postMsg('updateEnvironment', data);
   }
 }

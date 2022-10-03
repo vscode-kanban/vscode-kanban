@@ -61,6 +61,8 @@
     onClose,
     show
   }) => {
+    const { t } = window;
+
     const [Modal, Button, Form, Row, Col, Alert, Tabs, Tab, ListGroup] = window.vscodeKanban.getBootstrapComponents(
       'Modal', 'Button', 'Form', 'Row', 'Col', 'Alert', 'Tabs', 'Tab', 'ListGroup'
     );
@@ -80,6 +82,10 @@
     const [validationError, setValidationError] = React.useState('');
 
     const handleClose = React.useCallback(() => {
+      onClose();
+    }, [onClose]);
+
+    const handleSave = React.useCallback(() => {
       onClose();
     }, [onClose]);
 
@@ -218,9 +224,9 @@
           keyboard={false}
           centered
           className="boardCardDialog"
+          size="xl"
         >
           <Modal.Header
-            closeButton
             className={headerClasses.join(' ')}
           >
             <Modal.Title>{renderTitle()}</Modal.Title>
@@ -323,8 +329,16 @@
             </Form>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="primary" onClick={handleClose}>
-              Save Changes
+            <Button variant="secondary" onClick={handleClose}>
+              {t('close')}
+            </Button>
+
+            <Button
+              variant="primary"
+              onClick={handleSave}
+              disabled={!!validationError.length}
+            >
+              {t('save')}
             </Button>
           </Modal.Footer>
         </Modal>

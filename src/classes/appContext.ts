@@ -16,12 +16,18 @@
  */
 
 import DisposableBase from './disposableBase';
-import i18n, { Resource as TranslationResource, ResourceLanguage as TranslationResourceLanguage, TFunction } from 'i18next';
+import i18n, {
+  InitOptions as I18InitOptions,
+  Resource as TranslationResource,
+  ResourceLanguage as TranslationResourceLanguage,
+  TFunction
+} from 'i18next';
 import path from 'path';
 import vscode from 'vscode';
 import Workspace from './workspace';
 import type { CommandFactory } from '../commands';
 import { defaultLanguage } from '../constants';
+import type { CanBeNull } from '../types';
 
 /**
  * Options for `AppContext` class.
@@ -37,7 +43,8 @@ export interface IAppContextOptions {
  * The application context.
  */
 export default class AppContext extends DisposableBase {
-  protected _t!: TFunction;
+  protected _t: TFunction = (key) => key;  // start with dummy function
+  protected _tSettings: CanBeNull<I18InitOptions> = null;
   protected _workspaces: Workspace[] = [];
 
   /**
@@ -121,6 +128,15 @@ export default class AppContext extends DisposableBase {
   }
 
   /**
+   * Returns a copy of the settings for `t()` function.
+   */
+  get tSettings(): CanBeNull<I18InitOptions> {
+    return this._tSettings ? JSON.parse(
+      JSON.stringify(this._tSettings)
+    ) : null;
+  }
+
+  /**
    * Gets a copy of the current list of workspaces.
    *
    * @returns {Workspace[]} The workspaces.
@@ -168,7 +184,7 @@ export default class AppContext extends DisposableBase {
     let currentLang = (vscode.env.language || '').split('-')[0].toLowerCase().trim();
     currentLang = currentLang || defaultLanguage;
 
-    this._t = await i18n.init({
+    const tOpts: I18InitOptions = {
       resources: translationResource,
       supportedLngs: Object.keys(translationResource),
       fallbackLng: defaultLanguage,
@@ -176,7 +192,10 @@ export default class AppContext extends DisposableBase {
         escapeValue: false // react already safes from xss
       },
       lng: currentLang
-    });
+    };
+
+    this._t = await i18n.init(tOpts);
+    this._tSettings = tOpts;
   }
 
   /// private methods

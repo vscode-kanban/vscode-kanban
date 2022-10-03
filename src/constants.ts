@@ -19,4 +19,5 @@
 export const defaultLanguage = 'en';
 
 /// Base name of a Kanban file.
-export const kanbanFilename = 'vscode-kanban.json';
+export const kanbanBasename = 'vscode-kanban.';
+export const kanbanFilename = `${kanbanBasename}json`;

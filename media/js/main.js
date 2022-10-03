@@ -18,6 +18,7 @@
  */
 
 window.vscode = acquireVsCodeApi();
+window.t = (key) => key;  // start with a dummy t() function
 
 /**
  * Posts a message back to VSCode.
@@ -37,7 +38,8 @@ function postMsg(type, data) {
  */
 window.vscodeKanban = {
   ui: {
-    components: {}
+    components: {},
+    icon: null
   }
 };
 
@@ -109,18 +111,34 @@ window.vscodeKanban.setUIComponent = function (name, Component) {
 };
 
 // receive message from VSCode
-window.addEventListener('message', function (event) {
+window.addEventListener('message', async function (event) {
   const message = event.data;
 
   const { type, data } = message;
 
   switch (type) {
+    case 'updateEnvironment':
+      {
+        const { i18n: i18nextOpts } = data;
+
+        window.t = await i18next.init(i18nextOpts);
+
+        window.dispatchEvent(
+          new CustomEvent('onEnvironmentUpdated', {
+            detail: data
+          })
+        );
+      }
+      break;
+
     case 'onBoardUpdated':
-      window.dispatchEvent(
-        new CustomEvent(type, {
-          detail: data
-        })
-      );
+      {
+        window.dispatchEvent(
+          new CustomEvent(type, {
+            detail: data
+          })
+        );
+      }
       break;
   }
 });

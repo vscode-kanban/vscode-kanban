@@ -19,11 +19,52 @@
 
 (() => {
   window.vscodeKanban.setUIComponent('Header', () => {
+    const [Navbar, Container, Button] = window.vscodeKanban.getBootstrapComponents('Navbar', 'Container', 'Button');
+
+    const [icon, setIcon] = React.useState(null);
+    const [projectName, setProjectName] = React.useState(null);
+
+    const renderNavBrand = React.useCallback(() => {
+      let title = 'Kanban Board';
+      if (projectName?.length) {
+        title += ` (${projectName})`;
+      }
+
+      if (icon?.length) {
+        return (
+          <React.Fragment>
+            <img
+              alt=""
+              src={icon}
+              width="30"
+              height="30"
+              className="d-inline-block align-top"
+            />{' '}{title}
+          </React.Fragment>
+        );
+      } else {
+        return title;
+      }
+    }, [icon, projectName]);
+
+    React.useEffect(() => {
+      const handleEnvironmentUpdated = function(e) {
+        setIcon(e.detail.icon);
+        setProjectName(e.detail.projectName);
+      };
+  
+      window.addEventListener("onEnvironmentUpdated", handleEnvironmentUpdated);
+  
+      return () => {
+        window.removeEventListener("onEnvironmentUpdated", handleEnvironmentUpdated);
+      };
+    }, []);
+
     return (
       <nav className={`navbar ${window.vscodeKanban.getBGClass()} header fixed-top`}>
         <div className="container-fluid">
           <a className={`navbar-brand text-white`} href="#">
-            Kanban Board
+            {renderNavBrand()}
           </a>
   
           <div className="d-flex justify-content-end">
