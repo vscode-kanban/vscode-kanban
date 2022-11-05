@@ -166,13 +166,14 @@
               }}
             >
               <SearchIconWrapper>
-                <span class="material-icons">search</span>
+                <span class="material-icons">filter_list</span>
               </SearchIconWrapper>
               <StyledInputBase
                 placeholder={`${t('filter')} ...`}
                 onChange={(ev) => {
                   setFilter(String(ev.target.value || ''));
                 }}
+                autoFocus
               />
             </Search>
 
