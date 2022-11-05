@@ -3,3 +3,8 @@ Icons:
 
 Fonts:
     - /media/css/fa-* + /media/webfonts/fa-* (Font Awesome Free; https://fontawesome.com/)
+    - /media/webfonts/roboto* (https://google-webfonts-helper.herokuapp.com/fonts/roboto?subsets=latin)
+    - /media/webfonts/MaterialIcons* (https://github.com/google/material-design-icons)
+
+MUI:
+    - /js/material-ui*.js (https://mui.com/)

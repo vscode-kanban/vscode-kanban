@@ -30,69 +30,10 @@ body {
   margin: 0;
 }
 
+#vscode-kanban-board .boardHeader .boardIcon {
+  margin-left: 24px;
+}
+
 #vscode-kanban-board .boardBody {
   height: 100vh;
-  background-color: white !important;
-}
-
-#vscode-kanban-board .boardBody .cardColumns {
-  padding-top: 4.5rem;
-  padding-bottom: 1.0rem;
-  padding-left: 0.25rem;
-  padding-right: 0.25rem;
-}
-
-#vscode-kanban-board .boardBody .cardColumns .cardColumn .cardList {
-  width: 100%;
-}
-
-#vscode-kanban-board .boardBody .cardColumns .cardColumn .cardList .card .card-body {
-  width: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-#vscode-kanban-board .boardCard {
-  margin-bottom: 1rem;
-}
-
-#vscode-kanban-board .boardCard .card-header .header {
-  width: 100%;
-  display: table !important;
-}
-
-#vscode-kanban-board .boardCard .card-header .header .left {
-  display: table-cell !important;
-}
-
-#vscode-kanban-board .boardCard .card-header .header .right {
-  display: table-cell !important;
-  text-align: right;
-  width: 100%;
-}
-
-#vscode-kanban-board .boardCard .card-header .header .right .cardAction {
-  cursor: pointer;
-  margin-left: 0.75rem;
-}
-
-
-#vscode-kanban-board .cardColumns .cardColumn .card-header.header {
-  width: 100%;
-  display: table !important;
-}
-
-#vscode-kanban-board .cardColumns .cardColumn .card-header.header .left {
-  display: table-cell !important;
-  width: 100%;
-}
-
-#vscode-kanban-board .cardColumns .cardColumn .card-header.header .right {
-  display: table-cell !important;
-  text-align: right;
-}
-
-#vscode-kanban-board .cardColumns .cardColumn .card-header.header .right .cardColumnAction {
-  cursor: pointer;
-  margin-left: 0.75rem;
 }

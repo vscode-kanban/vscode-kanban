@@ -18,8 +18,24 @@
  */
 
 (() => {
-  const KanbanBoard = () => {
+  const {
+    CssBaseline,
+    ThemeProvider,
+    createTheme,
+  } = MaterialUI;  
+
+  const App = () => {
     const [Header, Body] = window.vscodeKanban.getUIComponents('Header', 'Body');
+
+    const [colorMode, setColorMode] = React.useState(window.vscodeKanban.colorMode);
+
+    const theme = React.useMemo(() => {
+      return createTheme({
+        palette: {
+          mode: colorMode === 'dark' ? 'dark' : 'light',
+        },
+      });
+    }, [colorMode]);
 
     React.useEffect(() => {
       // tell VSCode board has been rendered initially
@@ -27,12 +43,20 @@
     }, []);
 
     return (
-        <React.Fragment>
+        <ThemeProvider theme={theme}>
           <Header />
           <Body />
-        </React.Fragment>
+        </ThemeProvider>
     );
   };
-  
-  ReactDOM.render(<KanbanBoard />, document.querySelector("#vscode-kanban-board"));
+
+  ReactDOM.render(
+    (
+      <React.Fragment>
+        <CssBaseline />
+        <App />
+      </React.Fragment>
+    ),
+    document.querySelector("#vscode-kanban-board")
+  );
 })();

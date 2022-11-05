@@ -17,29 +17,90 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-(() => {
+ (() => {
+  const {
+    Box,
+    AppBar,
+    Toolbar,
+    Typography,
+    IconButton,
+    useTheme,
+    InputBase,
+    alpha,
+    styled
+  } = MaterialUI;
+
+  const Search = styled('div')(({ theme }) => ({
+    position: 'relative',
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: alpha(theme.palette.common.white, 0.15),
+    '&:hover': {
+      backgroundColor: alpha(theme.palette.common.white, 0.25),
+    },
+    marginLeft: 0,
+    width: '100%',
+    [theme.breakpoints.up('sm')]: {
+      marginLeft: theme.spacing(1),
+      width: 'auto',
+    },
+  }));
+
+  const SearchIconWrapper = styled('div')(({ theme }) => ({
+    padding: theme.spacing(0, 2),
+    height: '100%',
+    position: 'absolute',
+    pointerEvents: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }));
+
+  const StyledInputBase = styled(InputBase)(({ theme }) => ({
+    color: 'inherit',
+    '& .MuiInputBase-input': {
+      padding: theme.spacing(1, 1, 1, 0),
+      // vertical padding + font size from searchIcon
+      paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+      transition: theme.transitions.create('width'),
+      width: '100%',
+      [theme.breakpoints.up('sm')]: {
+        width: '12ch',
+        '&:focus': {
+          width: '20ch',
+        },
+      },
+      [theme.breakpoints.up('md')]: {
+        width: '24ch',
+        '&:focus': {
+          width: '40ch',
+        },
+      },
+    },
+  }));
+
   window.vscodeKanban.setUIComponent('Header', () => {
+    const { t } = window;
+
     const [board, setBoard] = React.useState(null);
     const [icon, setIcon] = React.useState(null);
     const [projectName, setProjectName] = React.useState(null);
 
-    const handleRefresh = React.useCallback(() => {
-      postMsg('requestBoardUpdate');
-    }, []);
+    const theme = useTheme();
 
-    const handleSave = React.useCallback(() => {
-      if (!board) {
-        return;
-      }
-
-      postMsg('onBoardUpdated', board);
-    }, [board]);
-
-    const renderNavBrand = React.useCallback(() => {
-      let title = 'Kanban Board';
+    const renderTitleBrand = React.useCallback(() => {
+      let titleText = 'Kanban';
       if (projectName?.length) {
-        title += ` (${projectName})`;
+        titleText += ` (${projectName})`;
       }
+
+      const title = (
+        <Typography
+          className="boardIcon"
+          variant="h6" component="div" sx={{ flexGrow: 1 }}
+        >
+          {titleText}
+        </Typography>
+      );
 
       if (icon?.length) {
         return (
@@ -78,43 +139,59 @@
     }, []);
 
     return (
-      <nav className={`navbar ${window.vscodeKanban.getBGClass()} header fixed-top`}>
-        <div className="container-fluid">
-          <a className={`navbar-brand text-white`} href="#">
-            {renderNavBrand()}
-          </a>
-  
-          <div className="d-flex justify-content-end">
+      <Box
+        className="boardHeader"
+        sx={{ flexGrow: 1 }}
+      >
+        <AppBar position="static">
+          <Toolbar>
+            {renderTitleBrand()}
+
             {/* filter */}
-            <button type="button" className="btn btn-sm btn-primary ms-1" disabled={!board}>
-              <i className="fa fa-filter"></i>
-            </button>
+            <Search
+              style={{
+                marginRight: theme.spacing(2),
+              }}
+            >
+              <SearchIconWrapper>
+                <span class="material-icons">search</span>
+              </SearchIconWrapper>
+              <StyledInputBase
+                placeholder={`${t('filter')} ...`}
+              />
+            </Search>
+
             {/* refresh */}
-            <button
-              type="button" className="btn btn-sm btn-secondary ms-1"
-              onClick={handleRefresh} disabled={!board}
+            <IconButton
+                color="secondary" size="small"
             >
               <i className="fa fa-arrows-rotate"></i>
-            </button>
+            </IconButton>
             {/* save */}
-            <button
-              type="button" className="btn btn-sm btn-secondary ms-1"
-              onClick={handleSave} disabled={!board}
+            <IconButton
+              color="secondary" size="small"
+              style={{
+                marginRight: theme.spacing(1)
+              }}
             >
               <i className="fa fa-floppy-disk"></i>
-            </button>
-  
-            {/* GitHub repository */}
-            <button type="button" className="btn btn-sm btn-dark ms-4">
+            </IconButton>
+            
+            {/* GitHub */}
+            <IconButton
+              color="inherit" size="small"
+            >
               <i className="fa-brands fa-github"></i>
-            </button>
+            </IconButton>
             {/* Author's homepage */}
-            <button type="button" className="btn btn-sm btn-dark ms-1">
+            <IconButton
+              color="inherit" size="small"
+            >
               <i className="fa fa-earth-europe"></i>
-            </button>
-          </div>
-        </div>
-      </nav>
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+      </Box>
     );
-  });  
+  });
 })();
