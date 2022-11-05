@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+
 /**
  * This file is part of the vscode-kanban distribution.
  * Copyright (c) Marcel Joachim Kloubert.
@@ -15,42 +17,19 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-* {
-  padding: 0;
-  margin: 0;
-}
+ (() => {
+  const {
+  } = MaterialUI;
 
-html {
-  padding: 0;
-  margin: 0;
-}
+  window.vscodeKanban.setUIComponent('BoardCard', ({
+    card
+  }) => {
+    const { title } = card;
 
-body {
-  padding: 0;
-  margin: 0;
-}
-
-#vscode-kanban-board .boardHeader .boardIcon {
-  margin-left: 24px;
-}
-
-#vscode-kanban-board .boardBody {
-  width: 100%;
-}
-
-#vscode-kanban-board .boardBody .boardProgress {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  -webkit-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
-}
-
-#vscode-kanban-board .boardBody .cardColumns {
-}
-
-#vscode-kanban-board .boardBody .cardColumns .cardColumn {
-}
-
-#vscode-kanban-board .boardBody .cardColumns .cardColumn .cardColumnCard {
-}
+    return (
+      <>
+        <div>{title}</div>
+      </>
+    );
+  });
+})();

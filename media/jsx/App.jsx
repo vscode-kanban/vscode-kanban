@@ -28,6 +28,7 @@
     const [Header, Body] = window.vscodeKanban.getUIComponents('Header', 'Body');
 
     const [colorMode, setColorMode] = React.useState(window.vscodeKanban.colorMode);
+    const [filter, setFilter] = React.useState('');
 
     const theme = React.useMemo(() => {
       return createTheme({
@@ -44,8 +45,12 @@
 
     return (
         <ThemeProvider theme={theme}>
-          <Header />
-          <Body />
+          <Header
+            onFilterChange={setFilter}
+          />
+          <Body
+            filter={filter}
+          />
         </ThemeProvider>
     );
   };

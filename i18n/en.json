@@ -1,4 +1,10 @@
 {
+  "card_columns": {
+    "todos": "Todos",
+    "in_progress": "In progress",
+    "testing": "Testing",
+    "done": "Done"
+  },
   "clear_card_list_dialog": {
     "title": "Clear card list",
     "body": "Do you really want to clear the list of cards?"

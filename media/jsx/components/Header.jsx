@@ -75,13 +75,22 @@
           width: '40ch',
         },
       },
+      [theme.breakpoints.up('lg')]: {
+        width: '36ch',
+        '&:focus': {
+          width: '60ch',
+        },
+      },
     },
   }));
 
-  window.vscodeKanban.setUIComponent('Header', () => {
+  window.vscodeKanban.setUIComponent('Header', ({
+    onFilterChange
+  }) => {
     const { t } = window;
 
     const [board, setBoard] = React.useState(null);
+    const [filter, setFilter] = React.useState('');
     const [icon, setIcon] = React.useState(null);
     const [projectName, setProjectName] = React.useState(null);
 
@@ -108,10 +117,9 @@
             <img
               alt=""
               src={icon}
-              width="30"
-              height="30"
-              className="d-inline-block align-top"
-            />{' '}{title}
+              width="32"
+              height="32"
+            />{title}
           </React.Fragment>
         );
       } else {
@@ -138,6 +146,10 @@
       };
     }, []);
 
+    React.useEffect(() => {
+      onFilterChange(filter);
+    }, [filter]);
+
     return (
       <Box
         className="boardHeader"
@@ -150,7 +162,7 @@
             {/* filter */}
             <Search
               style={{
-                marginRight: theme.spacing(2),
+                marginRight: theme.spacing(4),
               }}
             >
               <SearchIconWrapper>
@@ -158,20 +170,23 @@
               </SearchIconWrapper>
               <StyledInputBase
                 placeholder={`${t('filter')} ...`}
+                onChange={(ev) => {
+                  setFilter(String(ev.target.value || ''));
+                }}
               />
             </Search>
 
             {/* refresh */}
             <IconButton
-                color="secondary" size="small"
+                color="inherit" size="small"
             >
               <i className="fa fa-arrows-rotate"></i>
             </IconButton>
             {/* save */}
             <IconButton
-              color="secondary" size="small"
+              color="inherit" size="small"
               style={{
-                marginRight: theme.spacing(1)
+                marginRight: theme.spacing(2)
               }}
             >
               <i className="fa fa-floppy-disk"></i>
