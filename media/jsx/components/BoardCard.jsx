@@ -22,9 +22,11 @@
     Avatar,
     Box,
     Card,
+    CardActions,
     CardContent,
     Chip,
     Grid,
+    IconButton,
     Typography,
     useTheme
   } = MaterialUI;
@@ -37,7 +39,7 @@
     card,
     cardIndex,
     onClick,
-    onDoubleClick,
+    onEditClick,
   }) => {
     const [Markdown] = window.vscodeKanban.getUIComponents('Markdown');
 
@@ -55,17 +57,9 @@
       }
     }, [card.type, theme]);
 
-    const handleCardClick = React.useCallback((ev) => {
-      if (ev.detail === 2) {
-        onDoubleClick('card', {
-          card,
-        });
-      } else {
-        onClick('card', {
-          card,
-        });
-      }
-    }, [card, onClick, onDoubleClick]);
+    const handleCardEditClick = React.useCallback(() => {
+      onEditClick(card);
+    }, [card, onEditClick]);
 
     const renderTitle = React.useCallback(() => {
       const title = String(card.title ?? '').trim();
@@ -211,6 +205,19 @@
                     {renderInfo()}
                   </Grid>
                 </CardContent>
+
+                <CardActions disableSpacing>
+                  <Box
+                    sx={{ flexGrow: 1 }}
+                  />
+
+                  <IconButton
+                    color="inherit" size="small"
+                    onClick={handleCardEditClick}
+                  >
+                    <i className="material-icons">edit</i>
+                  </IconButton>
+                </CardActions>
               </Card>
             );
           }}

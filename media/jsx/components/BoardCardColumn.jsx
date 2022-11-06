@@ -42,7 +42,7 @@
     headerTextColor,
     isLast,
     onCardClick,
-    onCardDoubleClick,
+    onCardEditClick,
     title
   }) => {
     const [BoardCard] = window.vscodeKanban.getUIComponents('BoardCard');
@@ -78,9 +78,9 @@
       onCardClick(cardGroup, ...args);
     }, [cardGroup, onCardClick]);
 
-    const handleCardDoubleClick = React.useCallback((...args) => {
-      onCardDoubleClick(cardGroup, ...args);
-    }, [cardGroup, onCardDoubleClick]);
+    const handleCardEditClick = React.useCallback((...args) => {
+      onCardEditClick(cardGroup, ...args);
+    }, [cardGroup, onCardEditClick]);
 
     const renderCards = React.useCallback(() => {
       const allCards = window.vscodeKanban.getAllCards(board);
@@ -97,11 +97,11 @@
             cardId={`boardCard-${cardGroup}-${globalCardIndex}-${cardIndex}-${card.id}`}
             cardIndex={globalCardIndex}
             onClick={handleCardClick}
-            onDoubleClick={handleCardDoubleClick}
+            onEditClick={handleCardEditClick}
           />
         );
       });
-    }, [board, cardGroup, cards, handleCardClick, handleCardDoubleClick]);
+    }, [board, cardGroup, cards, handleCardClick, handleCardEditClick]);
 
     const renderButtons = React.useCallback(() => {
       return buttons?.map((button, buttonIndex) => {

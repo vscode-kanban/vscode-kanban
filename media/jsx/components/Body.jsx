@@ -159,8 +159,8 @@
       onFilterUpdate(newFilter);
     }, [filter, filterMode, onFilterUpdate]);
 
-    const handleDoubleCardClick = React.useCallback((cardGroup, type, data) => {
-      console.log('handleDoubleCardClick', cardGroup, type, data);
+    const handleCardEditClick = React.useCallback((cardGroup, data) => {
+      console.log('handleCardEditClick', cardGroup, data);
     }, []);
 
     const renderContent = React.useCallback(() => {
@@ -180,7 +180,7 @@
                 cardFilter={filterPredicate}
                 onBoardUpdate={handleBoardUpdate}
                 onCardClick={handleCardClick}
-                onCardDoubleClick={handleDoubleCardClick}
+                onCardEditClick={handleCardEditClick}
               />
 
               <BoardCardColumn
@@ -190,7 +190,7 @@
                 cardFilter={filterPredicate}
                 onBoardUpdate={handleBoardUpdate}
                 onCardClick={handleCardClick}
-                onCardDoubleClick={handleDoubleCardClick}
+                onCardEditClick={handleCardEditClick}
               />
 
               <BoardCardColumn
@@ -200,7 +200,7 @@
                 cardFilter={filterPredicate}
                 onBoardUpdate={handleBoardUpdate}
                 onCardClick={handleCardClick}
-                onCardDoubleClick={handleDoubleCardClick}
+                onCardEditClick={handleCardEditClick}
               />
 
               <BoardCardColumn
@@ -213,7 +213,7 @@
                 cardFilter={filterPredicate}
                 onBoardUpdate={handleBoardUpdate}
                 onCardClick={handleCardClick}
-                onCardDoubleClick={handleDoubleCardClick}
+                onCardEditClick={handleCardEditClick}
                 isLast
               />
             </DragDropContext>
