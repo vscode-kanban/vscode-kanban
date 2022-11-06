@@ -171,7 +171,7 @@
         style={{
           paddingBottom: theme.spacing(2)
         }}
-        onClick={handleCardClick}
+        // onClick={handleCardClick}
       >
         <Draggable draggableId={`draggable_card_${cardIndex}`} index={cardIndex}>
           {(provided, snapshot) => {
