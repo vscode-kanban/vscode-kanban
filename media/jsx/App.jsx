@@ -71,36 +71,39 @@
         }
       } else {
         const normalizedFilterParts = _(filter.split(' '))
-          .map((part) => part.trim())
+          .map((part) => part.toLowerCase().trim())
           .filter((part) => part !== '')
           .uniq()
           .take(10)
           .value();
 
-        predicate = (card) => {
-          const strValues = _([
-            card.assignedTo?.name,
-            card.category,
-            card.title,
-            card.description?.content,
-            card.details?.content,
-            card.title,
-            card.type
-          ]).map((value) => {
-            return String(value ?? '').toLowerCase().trim();
-          }).filter((str) => {
-            return str !== '';
-          }).value();
+        if (normalizedFilterParts.length) {
+          predicate = (card) => {
+            const strValues = _([
+              card.assignedTo?.name,
+              card.category,
+              card.title,
+              card.description?.content,
+              card.details?.content,
+              card.id,
+              card.type
+            ]).map((value) => {
+              return String(value ?? '').toLowerCase().trim();
+            }).filter((str) => {
+              return str !== '';
+            }).value();
 
-          return strValues.some((str) => {
             return normalizedFilterParts.every((part) => {
-              return str.includes(part);
+              return strValues.some((str) => {
+                return str.includes(part);
+              });
             });
-          });
-        };
+          };
+        }
       }
 
       if (typeof predicate !== 'function') {
+        // fallback
         predicate = () => true;
       }
 

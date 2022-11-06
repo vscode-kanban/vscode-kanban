@@ -97,16 +97,63 @@
     }, [board, handleBoardUpdate]);
 
     const handleCardClick = React.useCallback((cardGroup, type, data) => {
+      let newFilter = String(filter ?? '');
+      const normalizedFilter = newFilter.toLowerCase().trim();
+      const isAlreadyFilterExpr = normalizedFilter
+        .startsWith('f:');
+
+      const addFilterExpr = (expr) => {
+        if (normalizedFilter.length) {
+          newFilter = `${newFilter} and ${expr}`;
+        } else {
+          newFilter = `f:${expr}`;
+        }
+      };
+
+      const addRawExpr = (expr) => {
+        const normalizedExpr = expr.toLowerCase().trim();
+        const normalizedExprParts = _(normalizedExpr)
+          .split(' ')
+          .map((part) => part.trim())
+          .filter((part) => part !== '')
+          .uniq()
+          .value();
+
+        if (normalizedFilter.length) {
+          normalizedExprParts.forEach((part) => {
+            if (!normalizedFilter.includes(part)) {
+              newFilter = `${newFilter.trim()} ${part}`;
+            }
+          });
+        } else {
+          newFilter = expr;
+        }
+      };
+
       if (type === 'avatar') {
-        onFilterUpdate(`f:assigned_to == ${JSON.stringify(
-          String(data.card.assignedTo?.name ?? '')
-        )}`);
+        const assignedTo = String(data.card.assignedTo?.name ?? '');
+
+        if (!normalizedFilter.length || isAlreadyFilterExpr) {
+          addFilterExpr(`trim(lower(assigned_to)) == ${JSON.stringify(
+            assignedTo.toLowerCase().trim()
+          )}`);
+        } else {
+          addRawExpr(assignedTo);
+        }
       } else if (type === 'category') {
-        onFilterUpdate(`f:category == ${JSON.stringify(
-          String(data.card.category ?? '')
-        )}`);
+        const category = String(data.card.category ?? '');
+
+        if (!normalizedFilter.length || isAlreadyFilterExpr) {
+          addFilterExpr(`trim(lower(category)) == ${JSON.stringify(
+            category.toLowerCase().trim()
+          )}`);
+        } else {
+          addRawExpr(category);
+        }
       }
-    }, [onFilterUpdate]);
+
+      onFilterUpdate(newFilter);
+    }, [filter, onFilterUpdate]);
 
     const renderContent = React.useCallback(() => {
       if (board) {

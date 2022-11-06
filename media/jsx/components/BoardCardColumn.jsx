@@ -58,7 +58,7 @@
         }, (item) => {
           // then by type
 
-          const type = String(item.type || '').toLowerCase().trim();
+          const type = String(item.type ?? '').toLowerCase().trim();
           if (['emergency'].includes(type)) {
             return Number.MIN_SAFE_INTEGER;
           } else if (['bug'].includes(type)) {
@@ -68,7 +68,7 @@
           return Number.MAX_SAFE_INTEGER;
         }, (item) => {
           // then by title (case-insensitive)
-          return String(item.title || '').toLowerCase().trim();
+          return String(item.title ?? '').toLowerCase().trim();
         })
         .value();
     }, [board, cardFilter, cardGroup]);

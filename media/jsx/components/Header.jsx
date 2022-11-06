@@ -176,7 +176,7 @@
               <StyledInputBase
                 placeholder={`${t('filter')} ...`}
                 onChange={(ev) => {
-                  setFilter(String(ev.target.value || ''));
+                  setFilter(String(ev.target.value ?? ''));
                 }}
                 autoFocus
                 value={filter}

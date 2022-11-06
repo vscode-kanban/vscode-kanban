@@ -38,6 +38,8 @@
     cardIndex,
     onClick,
   }) => {
+    const [Markdown] = window.vscodeKanban.getUIComponents('Markdown');
+
     const theme = useTheme();
 
     const cardColor = React.useMemo(() => {
@@ -53,7 +55,7 @@
     }, [card.type, theme]);
 
     const renderTitle = React.useCallback(() => {
-      const title = String(card.title || '').trim();
+      const title = String(card.title ?? '').trim();
 
       if (title.length) {
         return (
@@ -67,24 +69,24 @@
     }, [card.title]);
 
     const renderDescription = React.useCallback(() => {
-      const descriptionContent = String(card.description?.content || '').trim();
+      const descriptionContent = String(card.description?.content ?? '').trim();
 
       return (
         <Box component="small" m={1}>
           <Typography
             variant="body2"
           >
-            {descriptionContent}
+            <Markdown source={descriptionContent} />
           </Typography>
         </Box>
       );
     }, [card.description?.content, theme]);
 
     const renderInfo = React.useCallback(() => {
-      const assignedTo = String(card.assignedTo?.name || '').trim();
-      const category = String(card.category || '').trim();
+      const assignedTo = String(card.assignedTo?.name ?? '').trim();
+      const category = String(card.category ?? '').trim();
       const bgColor = theme.palette[cardColor].dark;
-      const textColor = theme.palette.common.white;
+      const textColor = theme.palette[cardColor].contrastText;
       const avatarSize = theme.spacing(3);
       const avatarTextSize = theme.spacing(1.5);
 

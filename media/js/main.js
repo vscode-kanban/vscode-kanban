@@ -20,6 +20,23 @@
 window.vscode = acquireVsCodeApi();
 window.t = (key) => key;  // start with a dummy t() function
 
+// setup showdown
+((sd) => {
+  sd.setFlavor('github');
+
+  sd.setOption('completeHTMLDocument', false);
+  sd.setOption('encodeEmails', true);
+  sd.setOption('ghCodeBlocks', true);
+  sd.setOption('ghCompatibleHeaderId', true);
+  sd.setOption('headerLevelStart', 3);
+  sd.setOption('openLinksInNewWindow', true);
+  sd.setOption('simpleLineBreaks', true);
+  sd.setOption('simplifiedAutoLink', true);
+  sd.setOption('strikethrough', true);
+  sd.setOption('tables', true);
+  sd.setOption('tasklists', true);
+})(showdown);
+
 /**
  * Posts a message back to VSCode.
  *
