@@ -42,8 +42,12 @@
       setFilter(newFilter);
     }, []);
 
-    const filterPredicate = React.useMemo(() => {
+    const {
+      error: filterCompilationError,
+      predicate: filterPredicate,
+    } = React.useMemo(() => {
       let predicate;
+      let error;
       if (filter.trimStart().toLowerCase().startsWith('f:')) {
         const semicolon = filter.indexOf(':');
         const filterExpr = filter.substring(semicolon + 1);
@@ -64,9 +68,8 @@
               type: String(card.type ?? ''),
             });
           };
-        } catch (error) {
-          console.warn(`window.vscodeKanban.compileFilter(${JSON.stringify(filterExpr)}) failed:`, error);
-
+        } catch (ex) {
+          error = ex;
           predicate = false;
         }
       } else {
@@ -107,7 +110,10 @@
         predicate = () => true;
       }
 
-      return predicate;
+      return {
+        error,
+        predicate
+      };
     }, [filter]);
 
     React.useEffect(() => {
@@ -119,6 +125,7 @@
         <ThemeProvider theme={theme}>
           <Header
             filter={filter}
+            filterCompilationError={filterCompilationError}
             onFilterChange={setFilter}
           />
           <Body

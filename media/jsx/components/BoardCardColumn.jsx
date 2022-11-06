@@ -115,7 +115,9 @@
 
     return (
       <Grid
-        item xs={3} className="cardColumn"
+        className="cardColumn"
+        item
+        xs={3}
         style={{
           height: `calc(100vh - ${theme.spacing(12)})`,
           paddingRight: theme.spacing(isLast ? 0 : 2)

@@ -21,11 +21,11 @@
   const {
     Box,
     AppBar,
+    IconButton,
+    InputBase,
     Toolbar,
     Typography,
-    IconButton,
     useTheme,
-    InputBase,
     alpha,
     styled
   } = MaterialUI;
@@ -86,6 +86,7 @@
 
   window.vscodeKanban.setUIComponent('Header', ({
     filter: initialFilter = '',
+    filterCompilationError,
     onFilterChange
   }) => {
     const { t } = window;
@@ -96,6 +97,16 @@
     const [projectName, setProjectName] = React.useState(null);
 
     const theme = useTheme();
+
+    const filterCompilationHasFailed = React.useMemo(() => {
+      return !!filterCompilationError;
+    }, [filterCompilationError]);
+
+    const filterCompilationErrorMessage = React.useMemo(() => {
+      return filterCompilationHasFailed ?
+        String(filterCompilationError).trim() :
+        '';
+    }, [filterCompilationError, filterCompilationHasFailed]);
 
     const renderTitleBrand = React.useCallback(() => {
       let titleText = 'Kanban';
@@ -127,6 +138,38 @@
         return title;
       }
     }, [icon, projectName]);
+
+    const renderFilterControl = React.useCallback(() => {
+      let color;
+      let title;
+      if (filterCompilationErrorMessage.length) {
+        color = theme.palette.warning.main;
+        title = filterCompilationErrorMessage;
+      }
+
+      return (
+        <Search
+          style={{
+            marginRight: theme.spacing(4),
+            color,
+          }}
+          title={title}
+        >
+          <SearchIconWrapper>
+            <span class="material-icons">filter_list</span>
+          </SearchIconWrapper>
+
+          <StyledInputBase
+            placeholder={`${t('filter')} ...`}
+            onChange={(ev) => {
+              setFilter(String(ev.target.value ?? ''));
+            }}
+            autoFocus
+            value={filter}
+          />
+        </Search>
+      );
+    }, [filter, filterCompilationErrorMessage, t, theme]);
 
     React.useEffect(() => {
       const handleBoardUpdated = function(e) {
@@ -165,23 +208,7 @@
             {renderTitleBrand()}
 
             {/* filter */}
-            <Search
-              style={{
-                marginRight: theme.spacing(4),
-              }}
-            >
-              <SearchIconWrapper>
-                <span class="material-icons">filter_list</span>
-              </SearchIconWrapper>
-              <StyledInputBase
-                placeholder={`${t('filter')} ...`}
-                onChange={(ev) => {
-                  setFilter(String(ev.target.value ?? ''));
-                }}
-                autoFocus
-                value={filter}
-              />
-            </Search>
+            {renderFilterControl()}
 
             {/* refresh */}
             <IconButton
