@@ -20,8 +20,13 @@
   "errors": {
     "no_board_compatible_workspace_found": "There is currently no workspace, which can be used with a Kanban board!"
   },
-  "filter": "Filter",
+  "filter_expression": "Filter expression",
   "no": "No",
   "save": "Save",
+  "search": "Search",
+  "toggle_filter_mode": {
+    "switch_to_string_filter_expression": "Switch to filter expression mode",
+    "switch_to_string_search": "Switch to string search"
+  },
   "yes": "Yes"
 }

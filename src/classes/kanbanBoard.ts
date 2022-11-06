@@ -18,6 +18,7 @@
  */
 
 import AppContext from "./appContext";
+import dayJS from 'dayjs';
 import DisposableBase from "./disposableBase";
 import ejs from 'ejs';
 import vscode from "vscode";
@@ -222,6 +223,21 @@ export default class KanbanBoard extends DisposableBase {
   private async onDidReceiveMessage(ev: IKanbanBoardMessage) {
     try {
       switch (ev.type) {
+        case 'log':
+          {
+            const time = dayJS(ev.data.time);
+            const type: string = ev.data.type;
+            const args: any[] = ev.data.args;
+            const boardName = `${this.file.workspace.folder.name}`.trim();
+
+            this.app.output.append(`[${time.format('YYYY-MM-DD HH:mm:ss.SSS')}] ${boardName} :: (${type}) =>`);
+            args.forEach((a) => {
+              this.app.output.append(` ${a}`);
+            });
+            this.app.output.appendLine('');
+          }
+          break;
+
         case 'onBoardUpdated':
           {
             await this.saveBoard(ev.data as IBoard);

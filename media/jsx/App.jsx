@@ -25,10 +25,16 @@
   } = MaterialUI;  
 
   const App = () => {
+    const {
+      VSCODE_KANBAN_FILTER_MODE_STRING_SEARCH: FILTER_MODE_STRING_SEARCH,
+      VSCODE_KANBAN_FILTER_MODE_FILTER_EXPRESSION: FILTER_MODE_FILTER_EXPRESSION,
+    } = window;
+
     const [Header, Body] = window.vscodeKanban.getUIComponents('Header', 'Body');
 
     const [colorMode, setColorMode] = React.useState(window.vscodeKanban.colorMode);
     const [filter, setFilter] = React.useState('');
+    const [filterMode, setFilterMode] = React.useState(FILTER_MODE_STRING_SEARCH);
 
     const theme = React.useMemo(() => {
       return createTheme({
@@ -37,6 +43,14 @@
         },
       });
     }, [colorMode]);
+
+    const handleFilterChange = React.useCallback(({
+      filter: newFilter,
+      filterMode: newFilterMode,
+    }) => {
+      setFilter(newFilter);
+      setFilterMode(newFilterMode);
+    }, []);
 
     const handleFilterUpdate = React.useCallback((newFilter) => {
       setFilter(newFilter);
@@ -48,7 +62,8 @@
     } = React.useMemo(() => {
       let predicate;
       let error;
-      if (filter.trimStart().toLowerCase().startsWith('f:')) {
+
+      if (filterMode === FILTER_MODE_FILTER_EXPRESSION) {
         const semicolon = filter.indexOf(':');
         const filterExpr = filter.substring(semicolon + 1);
 
@@ -114,7 +129,7 @@
         error,
         predicate
       };
-    }, [filter]);
+    }, [filter, filterMode]);
 
     React.useEffect(() => {
       // tell VSCode board has been rendered initially
@@ -126,10 +141,11 @@
           <Header
             filter={filter}
             filterCompilationError={filterCompilationError}
-            onFilterChange={setFilter}
+            onFilterChange={handleFilterChange}
           />
           <Body
             filter={filter}
+            filterMode={filterMode}
             filterPredicate={filterPredicate}
             onFilterUpdate={handleFilterUpdate}
           />

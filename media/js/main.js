@@ -20,6 +20,9 @@
 window.vscode = acquireVsCodeApi();
 window.t = (key) => key;  // start with a dummy t() function
 
+window.VSCODE_KANBAN_FILTER_MODE_STRING_SEARCH = 'string_search';
+window.VSCODE_KANBAN_FILTER_MODE_FILTER_EXPRESSION = 'filter_expression';
+
 // setup showdown
 ((sd) => {
   sd.setFlavor('github');
@@ -217,6 +220,38 @@ window.vscodeKanban.getUIComponents = function (...names) {
   return components;
 };
 
+// setup global logger
+window.vscodeKanban.log = function (...args) {
+  this._doLog('log', args);
+};
+window.vscodeKanban.log._doLog = function (type, args) {
+  const now = new Date();
+
+  console[type](...args);
+
+  postMsg('log', {
+    time: now.toISOString(),
+    type,
+    args: args.map((a) => window.vscodeKanban.toSerializable(a)),
+  });
+};
+// setup log methods
+['info', 'warn', 'error', 'debug', 'trace'].forEach((method) => {
+  window.vscodeKanban.log[method] = function (...args) {
+    this._doLog(method, args);
+  };
+});
+
+window.addEventListener("error", function (ev) {
+  const { colno, filename, lineno, message } = ev;
+
+  window.vscodeKanban.log.error(
+    'Unhandled error in', filename, `at line ${lineno} and column ${colno}:`, message
+  );
+
+  return false;
+});
+
 /**
  * Returns a list of JSX components by name.
  * 
@@ -228,6 +263,41 @@ window.vscodeKanban.setUIComponent = function (name, Component) {
   MemorizedComponent.displayName = name;
 
   window.vscodeKanban.ui.components[name] = MemorizedComponent;
+};
+
+/**
+ * Converts a value to a serializable version.
+ * 
+ * @param {any} val The input value.
+ * 
+ * @returns {any} The output value.
+ */
+window.vscodeKanban.toSerializable = function (val) {
+  try {
+    if (!val) {
+      return val;
+    }
+    if (['boolean', 'number', 'string'].includes(typeof val)) {
+      return val;
+    }
+
+    if (Array.isArray(val)) {
+      return val.map((item) => this.toSerializable(item));
+    }
+
+    if (typeof val === 'object') {
+      const cloneOfVal = {};
+      for (const [key, value] of Object.entries(val)) {
+        cloneOfVal[String(key)] = this.toSerializable(value);
+      }
+
+      return cloneOfVal;
+    };
+
+    return String(val);  // fallback
+  } catch (error) {
+    return undefined;
+  }
 };
 
 // receive message from VSCode

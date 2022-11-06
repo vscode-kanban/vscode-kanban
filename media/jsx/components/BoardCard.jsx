@@ -87,8 +87,8 @@
       const category = String(card.category ?? '').trim();
       const bgColor = theme.palette[cardColor].dark;
       const textColor = theme.palette[cardColor].contrastText;
-      const avatarSize = theme.spacing(3);
-      const avatarTextSize = theme.spacing(1.5);
+      const avatarSize = theme.spacing(4);
+      const avatarTextSize = theme.spacing(2);
 
       let shortName = '';
       if (assignedTo.length) {
@@ -139,6 +139,7 @@
           {!!shortName.length && (
             <Avatar
               alt={assignedTo}
+              title={assignedTo}
               sx={{ width: avatarSize, height: avatarSize }}
               style={{
                 fontSize: avatarTextSize,

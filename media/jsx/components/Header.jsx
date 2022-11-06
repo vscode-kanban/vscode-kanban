@@ -49,10 +49,11 @@
     padding: theme.spacing(0, 2),
     height: '100%',
     position: 'absolute',
-    pointerEvents: 'none',
+    // pointerEvents: 'none',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 1000,
   }));
 
   const StyledInputBase = styled(InputBase)(({ theme }) => ({
@@ -89,10 +90,15 @@
     filterCompilationError,
     onFilterChange
   }) => {
-    const { t } = window;
+    const {
+      VSCODE_KANBAN_FILTER_MODE_STRING_SEARCH: FILTER_MODE_STRING_SEARCH,
+      VSCODE_KANBAN_FILTER_MODE_FILTER_EXPRESSION: FILTER_MODE_FILTER_EXPRESSION,
+      t
+    } = window;
 
     const [board, setBoard] = React.useState(null);
     const [filter, setFilter] = React.useState(initialFilter);
+    const [filterMode, setFilterMode] = React.useState(FILTER_MODE_STRING_SEARCH);
     const [icon, setIcon] = React.useState(null);
     const [projectName, setProjectName] = React.useState(null);
 
@@ -118,6 +124,9 @@
         <Typography
           className="boardIcon"
           variant="h6" component="div" sx={{ flexGrow: 1 }}
+          style={{
+            marginLeft: theme.spacing(3)
+          }}
         >
           {titleText}
         </Typography>
@@ -129,22 +138,55 @@
             <img
               alt=""
               src={icon}
-              width="32"
-              height="32"
+              width={theme.spacing(4)}
+              height={theme.spacing(4)}
             />{title}
           </React.Fragment>
         );
       } else {
         return title;
       }
-    }, [icon, projectName]);
+    }, [icon, projectName, theme]);
 
     const renderFilterControl = React.useCallback(() => {
       let color;
       let title;
       if (filterCompilationErrorMessage.length) {
-        color = theme.palette.warning.main;
+        color = theme.palette.error.main;
         title = filterCompilationErrorMessage;
+      }
+
+      const toggleFilterMode = () => {
+        if (filterMode === FILTER_MODE_FILTER_EXPRESSION) {
+          setFilterMode(FILTER_MODE_STRING_SEARCH);
+        } else {
+          setFilterMode(FILTER_MODE_FILTER_EXPRESSION);
+        }
+      };
+
+      let icon;
+      let placeholder;
+      let iconTitle;
+      if (filterMode === FILTER_MODE_STRING_SEARCH) {
+        icon = (
+          <span
+            className="material-icons"
+            onClick={toggleFilterMode}
+          >search</span>
+        );
+
+        placeholder = t('search');
+        iconTitle = t('toggle_filter_mode.switch_to_string_filter_expression');
+      } else {
+        icon = (
+          <span
+            className="material-icons"
+            onClick={toggleFilterMode}
+          >filter_list</span>
+        );
+
+        placeholder = t('filter_expression');
+        iconTitle = t('toggle_filter_mode.switch_to_string_search');
       }
 
       return (
@@ -155,21 +197,25 @@
           }}
           title={title}
         >
-          <SearchIconWrapper>
-            <span class="material-icons">filter_list</span>
+          <SearchIconWrapper
+            title={`${iconTitle} ...`}
+            style={{
+              cursor: 'pointer'
+            }}
+          >
+            {icon}
           </SearchIconWrapper>
 
           <StyledInputBase
-            placeholder={`${t('filter')} ...`}
+            placeholder={`${placeholder} ...`}
             onChange={(ev) => {
               setFilter(String(ev.target.value ?? ''));
             }}
-            autoFocus
             value={filter}
           />
         </Search>
       );
-    }, [filter, filterCompilationErrorMessage, t, theme]);
+    }, [filter, filterCompilationErrorMessage, filterMode, t, theme]);
 
     React.useEffect(() => {
       const handleBoardUpdated = function(e) {
@@ -191,8 +237,11 @@
     }, []);
 
     React.useEffect(() => {
-      onFilterChange(filter);
-    }, [filter]);
+      onFilterChange({
+        filter,
+        filterMode
+      });
+    }, [filter, filterMode]);
 
     React.useEffect(() => {
       setFilter(initialFilter);

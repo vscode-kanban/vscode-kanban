@@ -106,7 +106,7 @@
             key={`cardColumnButton-${buttonIndex}`}
           >
             <span
-              class={iconClass || 'material-icons'}
+              className={iconClass || 'material-icons'}
             >{icon}</span>
           </IconButton>
         );

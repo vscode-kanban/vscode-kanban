@@ -30,9 +30,14 @@
 
   window.vscodeKanban.setUIComponent('Body', ({
     filter,
+    filterMode,
     filterPredicate,
     onFilterUpdate
   }) => {
+    const {
+      VSCODE_KANBAN_FILTER_MODE_FILTER_EXPRESSION: FILTER_MODE_FILTER_EXPRESSION,
+    } = window;
+
     const { t } = window;
 
     const [BoardCardColumn] = window.vscodeKanban.getUIComponents('BoardCardColumn');
@@ -99,14 +104,13 @@
     const handleCardClick = React.useCallback((cardGroup, type, data) => {
       let newFilter = String(filter ?? '');
       const normalizedFilter = newFilter.toLowerCase().trim();
-      const isAlreadyFilterExpr = normalizedFilter
-        .startsWith('f:');
+      const isAlreadyFilterExpr = filterMode === FILTER_MODE_FILTER_EXPRESSION;
 
       const addFilterExpr = (expr) => {
         if (normalizedFilter.length) {
           newFilter = `${newFilter} and ${expr}`;
         } else {
-          newFilter = `f:${expr}`;
+          newFilter = `${expr}`;
         }
       };
 
@@ -126,14 +130,14 @@
             }
           });
         } else {
-          newFilter = expr;
+          newFilter = normalizedExpr;
         }
       };
 
       if (type === 'avatar') {
         const assignedTo = String(data.card.assignedTo?.name ?? '');
 
-        if (!normalizedFilter.length || isAlreadyFilterExpr) {
+        if (isAlreadyFilterExpr) {
           addFilterExpr(`trim(lower(assigned_to)) == ${JSON.stringify(
             assignedTo.toLowerCase().trim()
           )}`);
@@ -143,7 +147,7 @@
       } else if (type === 'category') {
         const category = String(data.card.category ?? '');
 
-        if (!normalizedFilter.length || isAlreadyFilterExpr) {
+        if (isAlreadyFilterExpr) {
           addFilterExpr(`trim(lower(category)) == ${JSON.stringify(
             category.toLowerCase().trim()
           )}`);
@@ -153,7 +157,7 @@
       }
 
       onFilterUpdate(newFilter);
-    }, [filter, onFilterUpdate]);
+    }, [filter, filterMode, onFilterUpdate]);
 
     const renderContent = React.useCallback(() => {
       if (board) {

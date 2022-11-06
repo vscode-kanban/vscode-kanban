@@ -80,6 +80,7 @@
     "typescript": "4.7.4"
   },
   "dependencies": {
+    "dayjs": "1.11.6",
     "ejs": "3.1.8",
     "i18next": "21.9.2"
   }
