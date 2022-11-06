@@ -37,6 +37,7 @@
     card,
     cardIndex,
     onClick,
+    onDoubleClick,
   }) => {
     const [Markdown] = window.vscodeKanban.getUIComponents('Markdown');
 
@@ -53,6 +54,18 @@
         return 'info';
       }
     }, [card.type, theme]);
+
+    const handleCardClick = React.useCallback((ev) => {
+      if (ev.detail === 2) {
+        onDoubleClick('card', {
+          card,
+        });
+      } else {
+        onClick('card', {
+          card,
+        });
+      }
+    }, [card, onClick, onDoubleClick]);
 
     const renderTitle = React.useCallback(() => {
       const title = String(card.title ?? '').trim();
@@ -158,6 +171,7 @@
         style={{
           paddingBottom: theme.spacing(2)
         }}
+        onClick={handleCardClick}
       >
         <Draggable draggableId={`draggable_card_${cardIndex}`} index={cardIndex}>
           {(provided, snapshot) => {
