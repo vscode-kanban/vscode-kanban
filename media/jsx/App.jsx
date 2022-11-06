@@ -38,6 +38,75 @@
       });
     }, [colorMode]);
 
+    const handleFilterUpdate = React.useCallback((newFilter) => {
+      setFilter(newFilter);
+    }, []);
+
+    const filterPredicate = React.useMemo(() => {
+      let predicate;
+      if (filter.trimStart().toLowerCase().startsWith('f:')) {
+        const semicolon = filter.indexOf(':');
+        const filterExpr = filter.substring(semicolon + 1);
+
+        try {
+          const compiledPredicate = window.vscodeKanban.compileFilter(filterExpr);
+
+          predicate = (card) => {
+            const category = String(card.category ?? '');
+
+            return !!compiledPredicate({
+              assigned_to: String(card.assignedTo?.name ?? ''),
+              cat: category,
+              category,
+              description: String(card.description?.content ?? ''),
+              details: String(card.details?.content ?? ''),
+              title: String(card.title ?? ''),
+              type: String(card.type ?? ''),
+            });
+          };
+        } catch (error) {
+          console.warn(`window.vscodeKanban.compileFilter(${JSON.stringify(filterExpr)}) failed:`, error);
+
+          predicate = false;
+        }
+      } else {
+        const normalizedFilterParts = _(filter.split(' '))
+          .map((part) => part.trim())
+          .filter((part) => part !== '')
+          .uniq()
+          .take(10)
+          .value();
+
+        predicate = (card) => {
+          const strValues = _([
+            card.assignedTo?.name,
+            card.category,
+            card.title,
+            card.description?.content,
+            card.details?.content,
+            card.title,
+            card.type
+          ]).map((value) => {
+            return String(value ?? '').toLowerCase().trim();
+          }).filter((str) => {
+            return str !== '';
+          }).value();
+
+          return strValues.some((str) => {
+            return normalizedFilterParts.every((part) => {
+              return str.includes(part);
+            });
+          });
+        };
+      }
+
+      if (typeof predicate !== 'function') {
+        predicate = () => true;
+      }
+
+      return predicate;
+    }, [filter]);
+
     React.useEffect(() => {
       // tell VSCode board has been rendered initially
       postMsg('onPageLoaded');
@@ -46,10 +115,13 @@
     return (
         <ThemeProvider theme={theme}>
           <Header
+            filter={filter}
             onFilterChange={setFilter}
           />
           <Body
             filter={filter}
+            filterPredicate={filterPredicate}
+            onFilterUpdate={handleFilterUpdate}
           />
         </ThemeProvider>
     );

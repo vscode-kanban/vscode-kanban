@@ -24,8 +24,14 @@
     useTheme
   } = MaterialUI;
 
+  const {
+    DragDropContext
+  } = ReactBeautifulDnd;
+
   window.vscodeKanban.setUIComponent('Body', ({
-    filter
+    filter,
+    filterPredicate,
+    onFilterUpdate
   }) => {
     const { t } = window;
 
@@ -35,44 +41,123 @@
 
     const [board, setBoard] = React.useState(null);
 
+    const handleBoardUpdate = React.useCallback(async ({ board: newBoard }) => {
+      await postMsg('onBoardUpdated', newBoard);
+
+      window.vscodeKanban.board = newBoard;
+      setBoard(newBoard);
+    }, []);
+
+    const handleDragEnd = React.useCallback((...args) => {
+      const ev = args[0];
+
+      const { destination, draggableId, source } = ev;
+      const { droppableId: droppableDestinationId } = destination;
+      const { droppableId: droppableSourceId } = source;
+
+      const draggableIdParts = draggableId.split('_');
+      const droppableDestinationIdParts = droppableDestinationId.split('_');
+      const droppableSourceIdParts = droppableSourceId.split('_');
+
+      const globalCardIndex = Number(_(draggableIdParts).last());
+      const sourceCardGroup = _(droppableSourceIdParts).last();
+      const destinationCardGroup = _(droppableDestinationIdParts).last();
+
+      if (sourceCardGroup === destinationCardGroup) {
+        return;
+      }
+
+      const allCards = window.vscodeKanban.getAllCards(board);
+      const matchingCard = allCards[globalCardIndex];
+      if (!matchingCard) {
+        return;
+      }
+
+      // create a new board
+      // without the card in the first step
+      const newBoard = {};
+      for (const [group, items] of Object.entries(board)) {
+        newBoard[group] = [...items];
+      }
+
+      let sourceCards = newBoard[sourceCardGroup];
+      if (Array.isArray(sourceCards)) {
+        newBoard[sourceCardGroup] = sourceCards = sourceCards.filter((item) => {
+          return item.id !== matchingCard.id;
+        });
+      }
+
+      const destinationCards = newBoard[destinationCardGroup];
+      if (Array.isArray(destinationCards)) {
+        // now add card to this column
+        destinationCards.push(matchingCard);
+      }
+  
+      handleBoardUpdate({ board: newBoard });
+    }, [board, handleBoardUpdate]);
+
+    const handleCardClick = React.useCallback((cardGroup, type, data) => {
+      if (type === 'avatar') {
+        onFilterUpdate(`f:assigned_to == ${JSON.stringify(
+          String(data.card.assignedTo?.name ?? '')
+        )}`);
+      } else if (type === 'category') {
+        onFilterUpdate(`f:category == ${JSON.stringify(
+          String(data.card.category ?? '')
+        )}`);
+      }
+    }, [onFilterUpdate]);
+
     const renderContent = React.useCallback(() => {
       if (board) {
         return (
           <Grid container className="cardColumns">
-            <BoardCardColumn
-              title={t('card_columns.todos')}
-              headerColor={theme.palette.secondary.main} headerTextColor={theme.palette.secondary.contrastText}
-              board={board} cardGroup={'todo'}
-              buttons={[{
-                icon: 'add_circle'
-              }]}
-              filter={filter}
-            />
+            <DragDropContext
+              onDragEnd={handleDragEnd}
+            >
+              <BoardCardColumn
+                title={t('card_columns.todos')}
+                headerColor={theme.palette.secondary.main} headerTextColor={theme.palette.secondary.contrastText}
+                board={board} cardGroup={'todo'}
+                buttons={[{
+                  icon: 'add_circle'
+                }]}
+                cardFilter={filterPredicate}
+                onBoardUpdate={handleBoardUpdate}
+                onCardClick={handleCardClick}
+              />
 
-            <BoardCardColumn
-              title={t('card_columns.in_progress')}
-              headerColor={theme.palette.primary.main} headerTextColor={theme.palette.primary.contrastText}
-              board={board} cardGroup={'in-progress'}
-              filter={filter}
-            />
+              <BoardCardColumn
+                title={t('card_columns.in_progress')}
+                headerColor={theme.palette.primary.main} headerTextColor={theme.palette.primary.contrastText}
+                board={board} cardGroup={'in-progress'}
+                cardFilter={filterPredicate}
+                onBoardUpdate={handleBoardUpdate}
+                onCardClick={handleCardClick}
+              />
 
-            <BoardCardColumn
-              title={t('card_columns.testing')}
-              headerColor={theme.palette.warning.main} headerTextColor={theme.palette.warning.contrastText}
-              board={board} cardGroup={'testing'}
-              filter={filter}
-            />
+              <BoardCardColumn
+                title={t('card_columns.testing')}
+                headerColor={theme.palette.warning.main} headerTextColor={theme.palette.warning.contrastText}
+                board={board} cardGroup={'testing'}
+                cardFilter={filterPredicate}
+                onBoardUpdate={handleBoardUpdate}
+                onCardClick={handleCardClick}
+              />
 
-            <BoardCardColumn
-              title={t('card_columns.done')}
-              headerColor={theme.palette.success.main} headerTextColor={theme.palette.success.contrastText}
-              board={board} cardGroup={'done'}
-              buttons={[{
-                icon: 'cleaning_services', iconClass: 'material-icons-outlined'
-              }]}
-              filter={filter}
-              isLast
-            />
+              <BoardCardColumn
+                title={t('card_columns.done')}
+                headerColor={theme.palette.success.main} headerTextColor={theme.palette.success.contrastText}
+                board={board} cardGroup={'done'}
+                buttons={[{
+                  icon: 'cleaning_services', iconClass: 'material-icons-outlined'
+                }]}
+                cardFilter={filterPredicate}
+                onBoardUpdate={handleBoardUpdate}
+                onCardClick={handleCardClick}
+                isLast
+              />
+            </DragDropContext>
           </Grid>
         );
       } else {
@@ -82,7 +167,7 @@
           </div>
         );
       }
-    }, [board, filter, theme]);
+    }, [board, filter, filterPredicate, handleCardClick, theme]);
 
     React.useEffect(() => {
       const handleBoardUpdated = function(e) {

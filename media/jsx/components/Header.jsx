@@ -85,12 +85,13 @@
   }));
 
   window.vscodeKanban.setUIComponent('Header', ({
+    filter: initialFilter = '',
     onFilterChange
   }) => {
     const { t } = window;
 
     const [board, setBoard] = React.useState(null);
-    const [filter, setFilter] = React.useState('');
+    const [filter, setFilter] = React.useState(initialFilter);
     const [icon, setIcon] = React.useState(null);
     const [projectName, setProjectName] = React.useState(null);
 
@@ -150,6 +151,10 @@
       onFilterChange(filter);
     }, [filter]);
 
+    React.useEffect(() => {
+      setFilter(initialFilter);
+    }, [initialFilter]);
+
     return (
       <Box
         className="boardHeader"
@@ -174,12 +179,13 @@
                   setFilter(String(ev.target.value || ''));
                 }}
                 autoFocus
+                value={filter}
               />
             </Search>
 
             {/* refresh */}
             <IconButton
-                color="inherit" size="small"
+              color="inherit" size="small"
             >
               <i className="fa fa-arrows-rotate"></i>
             </IconButton>

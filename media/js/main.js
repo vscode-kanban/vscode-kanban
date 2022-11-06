@@ -83,6 +83,38 @@ window.vscodeKanban.assignCardData = function (card, data) {
 };
 
 /**
+ * Compiles an expression to a filter predicate.
+ *
+ * @param {String} expr The expression.
+ *
+ * @returns {Function} The compiled predicate.
+ */
+window.vscodeKanban.compileFilter = function (expr) {
+  expr = String(expr || '');
+
+  if (expr.trim().length) {
+    return filtrex.compileExpression(expr, {
+      extraFunctions: {
+        lower: function (val) {
+          return this.str(val).toLowerCase();
+        },
+        str: function (val) {
+          return String(val ?? '');
+        },
+        trim: function (val) {
+          return this.str(val).trim();
+        },
+        upper: function (val) {
+          return this.str(val).toUpperCase();
+        }
+      }
+    });
+  } else {
+    return () => true;
+  }
+};
+
+/**
  * Finds the next, unused numeric ID inside a board.
  *
  * @param {Object} board The board.

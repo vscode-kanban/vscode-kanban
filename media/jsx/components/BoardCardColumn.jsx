@@ -29,13 +29,19 @@
     useTheme
   } = MaterialUI;
 
+  const {
+    Droppable
+  } = ReactBeautifulDnd;
+
   window.vscodeKanban.setUIComponent('BoardCardColumn', ({
     board,
     buttons,
+    cardFilter,
     cardGroup,
     headerColor,
     headerTextColor,
     isLast,
+    onCardClick,
     title
   }) => {
     const [BoardCard] = window.vscodeKanban.getUIComponents('BoardCard');
@@ -45,6 +51,7 @@
     // sorted list of cards
     const cards = React.useMemo(() => {
       return _(board[cardGroup])
+        .filter(cardFilter)
         .sortBy((item) => {
           // first sort by prio (DESC)
           return (isNaN(item.prio) ? 0 : item.prio) * -1;
@@ -64,18 +71,31 @@
           return String(item.title || '').toLowerCase().trim();
         })
         .value();
-    }, [board, cardGroup]);
+    }, [board, cardFilter, cardGroup]);
+
+    const handleCardClick = React.useCallback((...args) => {
+      onCardClick(cardGroup, ...args);
+    }, [cardGroup, onCardClick]);
 
     const renderCards = React.useCallback(() => {
+      const allCards = window.vscodeKanban.getAllCards(board);
+
       return cards.map((card, cardIndex) => {
+        const globalCardIndex = allCards.findIndex((globalCard) => {
+          return globalCard === card;
+        });
+
         return (
           <BoardCard
-            key={`boardCard-${cardGroup}-${cardIndex}-${card.id}`}
+            key={`boardCard-${cardGroup}-${globalCardIndex}-${cardIndex}-${card.id}`}
             card={card}
+            cardId={`boardCard-${cardGroup}-${globalCardIndex}-${cardIndex}-${card.id}`}
+            cardIndex={globalCardIndex}
+            onClick={handleCardClick}
           />
         );
       });
-    }, [cardGroup, cards]);
+    }, [board, cardGroup, cards, handleCardClick]);
 
     const renderButtons = React.useCallback(() => {
       return buttons?.map((button, buttonIndex) => {
@@ -116,14 +136,24 @@
             }}
           />
 
-          <CardContent
-            style={{
-              height: `calc(100vh - ${theme.spacing(12 + 15)})`,
-              overflowY: 'auto'
+          <Droppable droppableId={`cardColumn_droppable_${cardGroup}`}>
+            {(provided, snapshot) => {
+              return (
+                <CardContent
+                  style={{
+                    height: `calc(100vh - ${theme.spacing(12 + 15)})`,
+                    overflowY: 'auto'
+                  }}
+                  ref={provided.innerRef}
+                  {...provided.draggableProps}
+                  {...provided.dragHandleProps}
+                >
+                  {renderCards()}
+                  {provided.placeholder}
+                </CardContent>
+              );
             }}
-          >
-            {renderCards()}
-          </CardContent>
+          </Droppable>
 
           <CardActions disableSpacing>
             <Box
