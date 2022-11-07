@@ -1,6 +1,6 @@
 {
   "card_columns": {
-    "todos": "Todos",
+    "todo": "Todo",
     "in_progress": "In progress",
     "testing": "Testing",
     "done": "Done"

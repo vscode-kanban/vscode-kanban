@@ -171,7 +171,7 @@
               onDragEnd={handleDragEnd}
             >
               <BoardCardColumn
-                title={t('card_columns.todos')}
+                title={t('card_columns.todo')}
                 headerColor={theme.palette.secondary.main} headerTextColor={theme.palette.secondary.contrastText}
                 board={board} cardGroup={'todo'}
                 buttons={[{
