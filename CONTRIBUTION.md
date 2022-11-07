@@ -22,6 +22,12 @@ In VSCode, do the following steps to start a debug session:
 
 ![How to start debug session](./assets/screenshot1.png)
 
+The [Command Palette](https://code.visualstudio.com/api/ux-guidelines/command-palette) of the new editor window should now provide new commands, starting with `Kanban:` prefix.
+
+If you have already [the old extension installed](https://github.com/mkloubert/vscode-kanban), please deactivate it first:
+
+![How to deactivate old extension for workspace](./assets/screenshot2.png)
+
 ## Extension class
 
 The class, which helps to communicate between extension and Web UI, is called `KanbanBoard` and can be found in [kanbanBoard.ts file](./src/classes/kanbanBoard.ts).
