@@ -56,7 +56,8 @@
   ],
   "license": "LGPL-3.0",
   "author": {
-    "name": "Marcel Joachim Kloubert"
+    "name": "Marcel Joachim Kloubert",
+    "url": "https://github.com/mkloubert"
   },
   "repository": {
     "type": "git",

@@ -266,6 +266,67 @@ window.vscodeKanban.setUIComponent = function (name, Component) {
 };
 
 /**
+ * Calculates the difference between the current time and a submitted value
+ * and returns a pretty text representation of it.
+ *
+ * @param {any} val The input value.
+ *
+ * @returns {String} The pretty text.
+ */
+window.vscodeKanban.toPrettyTimeDiff = function (val) {
+  const now = dayjs();
+
+  if (!val) {
+    return val;
+  }
+
+  const time = dayjs(val);
+  if (!time.isValid()) {
+    return val;
+  }
+
+  const { t } = window;
+
+  const seconds = now.diff(time, 'seconds', true);
+
+  let text = false;
+
+  if (seconds < 60) {  // less than 1 minute?
+    text = t('formats.diffs.durations.less_then_1_minute');
+  } else if (seconds < 120) {  // less than 2 minutes?
+    text = t('formats.diffs.durations.less_then_2_minutes');
+  } else if (seconds < 3600) {  // less than 1 hour?
+    text = t('formats.diffs.durations.less_then_1_hour', {
+      minutes: Math.floor(seconds / 60.0)
+    });
+  } else if (seconds < 7200) {  // less than 2 hours?
+    text = t('formats.diffs.durations.less_then_2_hours');
+  } else {
+    if (now.format('YYYY-MM-DD') === time.format('YYYY-MM-DD')) {
+      text = t('today');
+    } else {
+      const yesterday = now.add(-1, 'days');
+      if (yesterday.format('YYYY-MM-DD') === time.format('YYYY-MM-DD')) {
+        text = t('yesterday');
+      } else {
+        if (seconds < 172800) {  // less than 2 days?
+          text = t('formats.diffs.durations.less_then_2_days');
+        }
+      }
+    }
+  }
+
+  if (typeof text !== 'string') {
+    // fallback => number of days
+    text = t('formats.diffs.durations.more_then_1_day', {
+      days: Math.floor(seconds / 86400.0)
+    });
+  }
+
+  return text;
+};
+
+/**
  * Converts a value to a serializable version.
  * 
  * @param {any} val The input value.

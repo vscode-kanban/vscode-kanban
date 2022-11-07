@@ -251,6 +251,26 @@ export default class KanbanBoard extends DisposableBase {
           }
           break;
 
+        case 'openAuthorsGithub':
+          {
+            const githubUrl = vscode.Uri.parse(
+              String(this.app.extension.extension.packageJSON.author.url)
+            );
+
+            vscode.env.openExternal(githubUrl);
+          }
+          break;
+
+        case 'openGithubRepo':
+          {
+            const githubUrl = vscode.Uri.parse(
+              String(this.app.extension.extension.packageJSON.bugs.url)
+            );
+
+            vscode.env.openExternal(githubUrl);
+          }
+          break;
+
         case 'requestBoardUpdate':
           {
             await this.sendBoardUpdatedEvent();

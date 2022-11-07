@@ -278,12 +278,14 @@
             {/* GitHub */}
             <IconButton
               color="inherit" size="small"
+              onClick={() => { postMsg('openGithubRepo'); }}
             >
               <i className="fa-brands fa-github"></i>
             </IconButton>
             {/* Author's homepage */}
             <IconButton
               color="inherit" size="small"
+              onClick={() => { postMsg('openAuthorsGithub'); }}
             >
               <i className="fa fa-earth-europe"></i>
             </IconButton>

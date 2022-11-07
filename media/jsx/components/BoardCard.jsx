@@ -22,11 +22,16 @@
     Avatar,
     Box,
     Card,
-    CardActions,
     CardContent,
+    CardHeader,
     Chip,
+    Divider,
     Grid,
     IconButton,
+    ListItemIcon,
+    ListItemText,
+    Menu,
+    MenuItem,
     Typography,
     useTheme
   } = MaterialUI;
@@ -35,15 +40,22 @@
     Draggable
   } = ReactBeautifulDnd;
 
+  const {
+    toPrettyTimeDiff
+  } = window.vscodeKanban;
+
   window.vscodeKanban.setUIComponent('BoardCard', ({
     card,
     cardIndex,
     onClick,
     onEditClick,
   }) => {
-    const [Markdown] = window.vscodeKanban.getUIComponents('Markdown');
+    const [Markdown, Icon] = window.vscodeKanban.getUIComponents('Markdown', 'Icon');
 
+    const { t } = window;
     const theme = useTheme();
+
+    const [anchorEl, setAnchorEl] = React.useState(null);
 
     const cardColor = React.useMemo(() => {
       const type = String(card.type).toLowerCase().trim();
@@ -61,41 +73,22 @@
       onEditClick(card);
     }, [card, onEditClick]);
 
-    const renderTitle = React.useCallback(() => {
+    const renderHeader = React.useCallback(() => {
+      const assignedTo = String(card.assignedTo?.name ?? '').trim();
       const title = String(card.title ?? '').trim();
 
-      if (title.length) {
-        return (
-          <Typography component="h5" variant="h6">
-            {title}
-          </Typography>
-        );
-      } else {
-        return null;
-      }
-    }, [card.title]);
+      const handleAvatarClick = () => {
+        onClick('avatar', {
+          card,
+        });
+      };
 
-    const renderDescription = React.useCallback(() => {
-      const descriptionContent = String(card.description?.content ?? '').trim();
-
-      return (
-        <Box component="small" m={1}>
-          <Typography
-            variant="body2"
-          >
-            <Markdown source={descriptionContent} />
-          </Typography>
-        </Box>
-      );
-    }, [card.description?.content, theme]);
-
-    const renderInfo = React.useCallback(() => {
-      const assignedTo = String(card.assignedTo?.name ?? '').trim();
-      const category = String(card.category ?? '').trim();
-      const bgColor = theme.palette[cardColor].dark;
-      const textColor = theme.palette[cardColor].contrastText;
-      const avatarSize = theme.spacing(4);
-      const avatarTextSize = theme.spacing(2);
+      const handleMenuClick = (ev) => {
+        setAnchorEl(ev.currentTarget);
+      };
+      const handleMenuClose = () => {
+        setAnchorEl(null);
+      };
 
       let shortName = '';
       if (assignedTo.length) {
@@ -114,11 +107,125 @@
         }
       }
 
-      const handleAvatarClick = () => {
-        onClick('avatar', {
-          card,
-        });
-      };
+      let avatar;
+      if (shortName.length) {
+        avatar = (
+          <Avatar
+            style={{
+              cursor: 'pointer',
+            }}
+            onClick={handleAvatarClick}
+          >{shortName}</Avatar>
+        );
+      }
+
+      let subheader = '';
+      try {
+        const creationTime = card.creation_time?.trim();
+        if (creationTime?.length) {
+          const time = dayjs(creationTime);
+          if (time.isValid()) {
+            subheader = toPrettyTimeDiff(time);
+          }
+        }
+      } catch (error) { }
+
+      return (
+        <React.Fragment>
+          <CardHeader
+            avatar={avatar}
+            action={
+              <IconButton
+                onClick={handleMenuClick}
+              >
+                <Icon>more_vert</Icon>
+              </IconButton>
+            }
+            title={title}
+            subheader={subheader}
+          />
+
+          <Menu
+            anchorEl={anchorEl}
+            open={!!anchorEl}
+            onClose={handleMenuClose}
+            onClick={handleMenuClose}
+            PaperProps={{
+              elevation: 0,
+              sx: {
+                overflow: 'visible',
+                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                mt: 1.5,
+                '& .MuiAvatar-root': {
+                  width: 32,
+                  height: 32,
+                  ml: -0.5,
+                  mr: 1,
+                },
+                '&:before': {
+                  content: '""',
+                  display: 'block',
+                  position: 'absolute',
+                  top: 0,
+                  right: 14,
+                  width: 10,
+                  height: 10,
+                  bgcolor: 'background.paper',
+                  transform: 'translateY(-50%) rotate(45deg)',
+                  zIndex: 0,
+                },
+              },
+              style: {
+                maxHeight: theme.spacing(6) * 4.5,
+                width: '20ch',
+              },
+            }}
+            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+          >
+            <MenuItem
+              onClick={handleCardEditClick}
+            >
+              <ListItemIcon>
+                <Icon>edit</Icon>
+              </ListItemIcon>
+              <ListItemText>{t('edit')}</ListItemText>
+            </MenuItem>
+
+            <Divider />
+
+            <MenuItem>
+              <ListItemIcon>
+                <Icon>delete</Icon>
+              </ListItemIcon>
+              <ListItemText>{t('delete')}</ListItemText>
+            </MenuItem>
+          </Menu>
+        </React.Fragment>
+      );
+    }, [anchorEl, card.assignedTo?.name, card.creation_time, card.title, handleCardEditClick, theme, t]);
+
+    const renderDescription = React.useCallback(() => {
+      const descriptionContent = String(card.description?.content ?? '').trim();
+      if (descriptionContent.length) {
+        return (
+          <Box component="small" m={1}>
+            <Typography
+              variant="body2"
+            >
+              <Markdown source={descriptionContent} />
+            </Typography>
+          </Box>
+        );
+      } else {
+        return null;
+      }
+    }, [card.description?.content, theme]);
+
+    const renderInfo = React.useCallback(() => {
+      const category = String(card.category ?? '').trim();
+      const bgColor = theme.palette[cardColor].dark;
+      const textColor = theme.palette[cardColor].contrastText;
 
       const handleCategoryClick = () => {
         onClick('category', {
@@ -141,19 +248,6 @@
             />
           ) : (
             <span>&nbsp;</span>
-          )}
-
-          {!!shortName.length && (
-            <Avatar
-              alt={assignedTo}
-              title={assignedTo}
-              sx={{ width: avatarSize, height: avatarSize }}
-              style={{
-                fontSize: avatarTextSize,
-                cursor: 'pointer',
-              }}
-              onClick={handleAvatarClick}
-            >{shortName}</Avatar>
           )}
         </React.Fragment>
       );
@@ -184,11 +278,9 @@
                 ref={provided.innerRef}
                 {...additionalProps}
               >
+                {renderHeader()}
+
                 <CardContent>
-                  <Grid item xs={12}>
-                    {renderTitle()}
-                  </Grid>
-    
                   <Grid item xs={12}>
                     {renderDescription()}
                   </Grid>
@@ -205,19 +297,6 @@
                     {renderInfo()}
                   </Grid>
                 </CardContent>
-
-                <CardActions disableSpacing>
-                  <Box
-                    sx={{ flexGrow: 1 }}
-                  />
-
-                  <IconButton
-                    color="inherit" size="small"
-                    onClick={handleCardEditClick}
-                  >
-                    <i className="material-icons">edit</i>
-                  </IconButton>
-                </CardActions>
               </Card>
             );
           }}
