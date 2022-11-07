@@ -8,6 +8,20 @@ The tasks will be organized in [Project area](https://github.com/orgs/vscode-kan
 
 Exceptions are things, like bugfixes and important updates ... for this you can [create a pull request](https://github.com/vscode-kanban/vscode-kanban/pulls) directly, of course.
 
+## Work with the code
+
+First [fork the code](https://github.com/vscode-kanban/vscode-kanban/fork) and create a new branch.
+
+After cloning your forked repository to your machine, keep sure to run [inside Node.js 16 or later](https://nodejs.org/en/blog/release/v16.0.0/) and with [npm 7 or later](https://www.npmjs.com/package/npm/), before you can run the following command from the root directory of the project:
+
+```bash
+npm install
+```
+
+In VSCode, do the following steps to start a debug session:
+
+![How to start debug session](./assets/screenshot1.png)
+
 ## Extension class
 
 The class, which helps to communicate between extension and Web UI, is called `KanbanBoard` and can be found in [kanbanBoard.ts file](./src/classes/kanbanBoard.ts).
