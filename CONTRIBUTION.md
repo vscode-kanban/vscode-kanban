@@ -257,4 +257,4 @@ export async function activate(context: vscode.ExtensionContext) {
 The command will be now available via the ID `extension.kanban.myCommand`.
 
 If the command should also be available in the [Command Palette
-](https://code.visualstudio.com/api/ux-guidelines/command-palette), do not forget to update the `contributes.commands` section of the [package.json file](./package.json) ... s. [Creating a user facing command](https://code.visualstudio.com/api/extension-guides/command#creating-a-user-facing-command) for for information
+](https://code.visualstudio.com/api/ux-guidelines/command-palette), do not forget to update the `contributes.commands` section of the [package.json file](./package.json) ... s. [Creating a user facing command](https://code.visualstudio.com/api/extension-guides/command#creating-a-user-facing-command) for more information.
