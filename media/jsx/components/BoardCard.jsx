@@ -48,6 +48,7 @@
     card,
     cardIndex,
     onClick,
+    onDeleteClick,
     onEditClick,
   }) => {
     const [Markdown, Icon] = window.vscodeKanban.getUIComponents('Markdown', 'Icon');
@@ -68,6 +69,10 @@
         return 'info';
       }
     }, [card.type, theme]);
+
+    const handleCardDeleteClick = React.useCallback(() => {
+      onDeleteClick(card);
+    }, [card, onDeleteClick]);
 
     const handleCardEditClick = React.useCallback(() => {
       onEditClick(card);
@@ -194,7 +199,9 @@
 
             <Divider />
 
-            <MenuItem>
+            <MenuItem
+              onClick={handleCardDeleteClick}
+            >
               <ListItemIcon>
                 <Icon>delete</Icon>
               </ListItemIcon>
@@ -203,7 +210,7 @@
           </Menu>
         </React.Fragment>
       );
-    }, [anchorEl, card.assignedTo?.name, card.creation_time, card.title, handleCardEditClick, theme, t]);
+    }, [anchorEl, card.assignedTo?.name, card.creation_time, card.title, handleCardDeleteClick, handleCardEditClick, theme, t]);
 
     const renderDescription = React.useCallback(() => {
       const descriptionContent = String(card.description?.content ?? '').trim();

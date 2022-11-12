@@ -42,6 +42,7 @@
     headerTextColor,
     isLast,
     onCardClick,
+    onCardDeleteClick,
     onCardEditClick,
     title
   }) => {
@@ -78,6 +79,10 @@
       onCardClick(cardGroup, ...args);
     }, [cardGroup, onCardClick]);
 
+    const handleCardDeleteClick = React.useCallback((...args) => {
+      onCardDeleteClick(cardGroup, ...args);
+    }, [cardGroup, onCardDeleteClick]);
+
     const handleCardEditClick = React.useCallback((...args) => {
       onCardEditClick(cardGroup, ...args);
     }, [cardGroup, onCardEditClick]);
@@ -97,11 +102,12 @@
             cardId={`boardCard-${cardGroup}-${globalCardIndex}-${cardIndex}-${card.id}`}
             cardIndex={globalCardIndex}
             onClick={handleCardClick}
+            onDeleteClick={handleCardDeleteClick}
             onEditClick={handleCardEditClick}
           />
         );
       });
-    }, [board, cardGroup, cards, handleCardClick, handleCardEditClick]);
+    }, [board, cardGroup, cards, handleCardClick, handleCardDeleteClick, handleCardEditClick]);
 
     const renderButtons = React.useCallback(() => {
       return buttons?.map((button, buttonIndex) => {

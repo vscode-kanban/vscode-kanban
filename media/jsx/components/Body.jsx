@@ -40,11 +40,12 @@
 
     const { t } = window;
 
-    const [BoardCardColumn] = window.vscodeKanban.getUIComponents('BoardCardColumn');
+    const [BoardCardColumn, ConfirmDialog] = window.vscodeKanban.getUIComponents('BoardCardColumn', 'ConfirmDialog');
 
     const theme = useTheme();
 
     const [board, setBoard] = React.useState(null);
+    const [cardToDelete, setCardToDelete] = React.useState(null);
 
     const handleBoardUpdate = React.useCallback(async ({ board: newBoard }) => {
       await postMsg('onBoardUpdated', newBoard);
@@ -159,7 +160,11 @@
       onFilterUpdate(newFilter);
     }, [filter, filterMode, onFilterUpdate]);
 
-    const handleCardEditClick = React.useCallback((cardGroup, data) => {
+    const handleCardDeleteClick = React.useCallback((cardGroup, card) => {
+      setCardToDelete(card);
+    }, []);
+
+    const handleCardEditClick = React.useCallback((cardGroup, card) => {
       console.log('handleCardEditClick', cardGroup, data);
     }, []);
 
@@ -180,6 +185,7 @@
                 cardFilter={filterPredicate}
                 onBoardUpdate={handleBoardUpdate}
                 onCardClick={handleCardClick}
+                onCardDeleteClick={handleCardDeleteClick}
                 onCardEditClick={handleCardEditClick}
               />
 
@@ -190,6 +196,7 @@
                 cardFilter={filterPredicate}
                 onBoardUpdate={handleBoardUpdate}
                 onCardClick={handleCardClick}
+                onCardDeleteClick={handleCardDeleteClick}
                 onCardEditClick={handleCardEditClick}
               />
 
@@ -200,6 +207,7 @@
                 cardFilter={filterPredicate}
                 onBoardUpdate={handleBoardUpdate}
                 onCardClick={handleCardClick}
+                onCardDeleteClick={handleCardDeleteClick}
                 onCardEditClick={handleCardEditClick}
               />
 
@@ -213,6 +221,7 @@
                 cardFilter={filterPredicate}
                 onBoardUpdate={handleBoardUpdate}
                 onCardClick={handleCardClick}
+                onCardDeleteClick={handleCardDeleteClick}
                 onCardEditClick={handleCardEditClick}
                 isLast
               />
@@ -226,7 +235,34 @@
           </div>
         );
       }
-    }, [board, filter, filterPredicate, handleCardClick, theme]);
+    }, [board, filter, filterPredicate, handleCardClick, handleCardDeleteClick, theme]);
+
+    const renderDialogs = React.useCallback(() => {
+      if (cardToDelete) {
+        const handleOnClose = (yesButtonClicked) => {
+          if (yesButtonClicked === true) {
+            const newBoard = { ...board };
+
+            for (const [boardGroup, groupCards] of Object.entries(newBoard)) {
+              newBoard[boardGroup] = groupCards.filter((card) => card.id !== cardToDelete.id);
+            }
+
+            handleBoardUpdate({ board: newBoard });
+          }
+
+          setCardToDelete(null);
+        };
+
+        return (
+          <ConfirmDialog
+            onClose={handleOnClose}
+            show
+            title={t('delete_card_dialog.title', { title: cardToDelete.title })}
+            body={t('delete_card_dialog.body')}
+          />
+        );
+      }
+    }, [board, cardToDelete, handleBoardUpdate]);
 
     React.useEffect(() => {
       const handleBoardUpdated = function(e) {
@@ -241,17 +277,21 @@
     }, []);
 
     return (
-      <div
-        className="boardBody"
-        style={{
-          backgroundColor: theme.palette.background.default,
-          color: theme.palette.text.primary,
-          height: `calc(100vh - ${theme.spacing(8)})`,
-          padding: theme.spacing(2)
-        }}
-      >
-        {renderContent()}
-      </div>
+      <React.Fragment>
+        <div
+          className="boardBody"
+          style={{
+            backgroundColor: theme.palette.background.default,
+            color: theme.palette.text.primary,
+            height: `calc(100vh - ${theme.spacing(8)})`,
+            padding: theme.spacing(2)
+          }}
+        >
+          {renderContent()}
+        </div>
+
+        {renderDialogs()}
+      </React.Fragment>
     );
   });
 })();
