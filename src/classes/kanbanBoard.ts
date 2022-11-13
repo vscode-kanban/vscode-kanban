@@ -26,7 +26,7 @@ import type Workspace from "./workspace";
 import { getNonce } from "../utils";
 import type { IWorkspaceBoardFile } from "./workspace";
 import type { CanBeNullOrUndefined, IBoard } from "../types";
-import { kanbanBasename } from "../constants";
+import { kanbanBasename, kanbanStyleFilename } from "../constants";
 
 interface IKanbanBoardMessage<TData = any> {
   type: string;
@@ -81,6 +81,15 @@ export default class KanbanBoard extends DisposableBase {
   }
 
   /**
+   * Possible URI for a `.vscode/vscode-kanban.css` file.
+   */
+  get customCSSFileUri(): vscode.Uri {
+    return vscode.Uri.joinPath(
+      this.file.folderUri, kanbanStyleFilename
+    );
+  }
+
+  /**
    * Get the underlying board file.
    */
   get file(): IWorkspaceBoardFile {
@@ -99,7 +108,9 @@ export default class KanbanBoard extends DisposableBase {
    */
   async open() {
     const localResourceRoots: vscode.Uri[] = [
-      this.mediaFolderUri
+      this.mediaFolderUri,
+      this.app.homeFolderUri,
+      this.vscodeFolderUri,
     ];
 
     const kanbanFolderUri = this.file.folderUri;
@@ -134,6 +145,13 @@ export default class KanbanBoard extends DisposableBase {
    */
   get title(): string {
     return `[Kanban] ${this.file.workspace.folder.name}`;
+  }
+
+  /**
+   * Gets the possible URI for a `.vscode` subfolder inside the underlying workspace.
+   */
+  get vscodeFolderUri(): vscode.Uri {
+    return vscode.Uri.joinPath(this.workspace.folder.uri, '.vscode');
   }
 
   /**
@@ -190,12 +208,35 @@ export default class KanbanBoard extends DisposableBase {
       }
     }
 
+    // custom styles
+    const cssUris: vscode.Uri[] = [];
+    {
+      const additionalCSSUrisToCheck: vscode.Uri[] = [
+        this.app.customCSSFileUri,
+        this.customCSSFileUri
+      ];
+
+      for (const cssUri of additionalCSSUrisToCheck) {
+        try {
+          const stat = await fs.stat(cssUri);
+          if (stat.type !== vscode.FileType.Directory) {
+            cssUris.push(
+              webview.asWebviewUri(cssUri)
+            );
+          }
+        } catch (error) {
+          // TODO: log
+        }
+      }
+    }
+
     return ejs.render(
       mainEJS,
       {
         colorMode,
         componentsUri: componentsUri.toString(),
         cspSource: webview.cspSource,
+        cssUris: cssUris.map((jsxUri) => jsxUri.toString()),
         jsxComponentUris: jsxComponentUris.map((jsxUri) => jsxUri.toString()),
         nonce,
         rootUri: rootUri.toString(),

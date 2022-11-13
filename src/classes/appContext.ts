@@ -22,11 +22,12 @@ import i18n, {
   ResourceLanguage as TranslationResourceLanguage,
   TFunction
 } from 'i18next';
+import os from 'os';
 import path from 'path';
 import vscode from 'vscode';
 import Workspace from './workspace';
 import type { CommandFactory } from '../commands';
-import { defaultLanguage } from '../constants';
+import { defaultLanguage, kanbanName, kanbanStyleFilename } from '../constants';
 import type { CanBeNull } from '../types';
 
 /**
@@ -61,6 +62,15 @@ export default class AppContext extends DisposableBase {
   }
 
   /**
+   * Possible URI for a `${HOME}/.vscode-kanban/vscode-kanban.css` file.
+   */
+  get customCSSFileUri(): vscode.Uri {
+    return vscode.Uri.joinPath(
+      this.homeFolderUri, kanbanStyleFilename
+    );
+  }
+
+  /**
    * @inheritdoc
    */
   dispose() {
@@ -77,6 +87,16 @@ export default class AppContext extends DisposableBase {
    */
   get extension(): vscode.ExtensionContext {
     return this.options.extension;
+  }
+
+  /**
+   * Gets the possible URI of the `.vscode-kanban` subfolder
+   * inside the home directory of the current user.
+   */
+  get homeFolderUri(): vscode.Uri {
+    const homeDirUri = vscode.Uri.file(os.homedir());
+
+    return vscode.Uri.joinPath(homeDirUri, `.${kanbanName}`);
   }
 
   /**
@@ -121,35 +141,31 @@ export default class AppContext extends DisposableBase {
   }
 
   /**
-   * Returns the function, whichs returns translated strings.
-   */
-  get t(): TFunction {
-    return this._t;
-  }
-
-  /**
-   * Returns a copy of the settings for `t()` function.
-   */
-  get tSettings(): CanBeNull<I18InitOptions> {
-    return this._tSettings ? JSON.parse(
-      JSON.stringify(this._tSettings)
-    ) : null;
-  }
-
-  /**
-   * Gets a copy of the current list of workspaces.
-   *
-   * @returns {Workspace[]} The workspaces.
-   */
-  get workspaces(): Workspace[] {
-    return [...this._workspaces];
-  }
-
-  /**
    * Starts the app.
    */
   async start() {
     const { fs } = vscode.workspace;
+
+    // ${HOME}/.vscode-kanban subfolder
+    await (async () => {
+      const homeDirUri = this.homeFolderUri;
+      try {
+        const stat = await fs.stat(homeDirUri);
+        if (stat.type === vscode.FileType.File) {
+          throw vscode.FileSystemError.FileNotADirectory(homeDirUri);
+        }
+      } catch (error) {
+        if (error instanceof vscode.FileSystemError) {
+          if (error.code === 'FileNotFound') {
+            await fs.createDirectory(homeDirUri);
+
+            return;
+          }
+        }
+
+        throw error;
+      }
+    })();
 
     vscode.workspace.workspaceFolders?.forEach((wsf) => {
       this.addWorkspace(wsf);
@@ -196,6 +212,31 @@ export default class AppContext extends DisposableBase {
 
     this._t = await i18n.init(tOpts);
     this._tSettings = tOpts;
+  }
+
+  /**
+   * Returns the function, whichs returns translated strings.
+   */
+  get t(): TFunction {
+    return this._t;
+  }
+
+  /**
+   * Returns a copy of the settings for `t()` function.
+   */
+  get tSettings(): CanBeNull<I18InitOptions> {
+    return this._tSettings ? JSON.parse(
+      JSON.stringify(this._tSettings)
+    ) : null;
+  }
+
+  /**
+   * Gets a copy of the current list of workspaces.
+   *
+   * @returns {Workspace[]} The workspaces.
+   */
+  get workspaces(): Workspace[] {
+    return [...this._workspaces];
   }
 
   /// private methods

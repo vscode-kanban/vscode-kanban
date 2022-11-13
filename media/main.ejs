@@ -40,6 +40,9 @@
 
     <!-- custom -->
     <link href="<%- rootUri %>/css/main.css" rel="stylesheet">
+    <% cssUris.forEach(function(cssUri) { %>
+      <link href="<%- cssUri %>" rel="stylesheet">
+    <% }); %>
 
     <title><%= title %></title>
   </head>
