@@ -24,6 +24,8 @@
   }) => {
     const elRef = React.useRef(null);
 
+    const { colorMode } = window.vscodeKanban;
+
     const html = React.useMemo(() => {
       const converter = new showdown.Converter();
 
@@ -43,7 +45,23 @@
       elRef.current?.querySelectorAll('pre code').forEach((childEl) => {
         hljs.highlightElement(childEl);
       });
-    }, [elRef.current]);
+
+      // Mermaid.js
+      elRef.current?.querySelectorAll('pre code').forEach((childEl) => {
+        try {
+          if (!childEl.attributes['class']?.value?.toLowerCase().includes('mermaid')) {
+            return;  // no `mermaid` block
+          }
+  
+          mermaid.init({
+            darkMode: colorMode === 'dark',
+            theme: colorMode === 'dark' ? 'dark' : 'neutral',
+          }, childEl);
+        } catch (error) {
+          // TODO: log
+        }
+      });
+    }, [colorMode, elRef.current]);
 
     return renderContent();
   });
