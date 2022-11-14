@@ -115,16 +115,71 @@ window.vscodeKanban.compileFilter = function (expr) {
   if (expr.trim().length) {
     return filtrex.compileExpression(expr, {
       extraFunctions: {
-        lower: function (val) {
+        // Handles a value as string and checks if all string arguments can be found inside it (case insensitive).
+        all(val, ...args) {
+          const s = this.str(val)
+            .toLowerCase()
+            .trim();
+
+          return args.map((a) => this.str(a).toLowerCase().trim())
+            .every((a) => s.includes(a));
+        },
+        // Handles a value as string and checks if any string argument can be found inside it (case insensitive).
+        any(val, ...args) {
+          const s = this.str(val)
+            .toLowerCase()
+            .trim();
+
+          return args.some((a) => {
+            return s.includes(
+              this.str(a).toLowerCase().trim()
+            );
+          });
+        },
+        // Returns a value as float number.
+        float(val) {
+          return parseFloat(
+            this.str(val).trim()
+          );
+        },
+        // Alias of integer().
+        int(val) {
+          return this.integer(val);
+        },
+        // Returns a value as integer number.
+        integer(val) {
+          return parseInt(
+            this.str(val).trim()
+          );
+        },
+        // Handles a value as string and converts the characters to lower case.
+        lower(val) {
           return this.str(val).toLowerCase();
         },
-        str: function (val) {
+        // Alias of normalize().
+        norm(val) {
+          return this.normalize(val);
+        },
+        // Handles a value as a string, converts all characters to lower case
+        // and removes leading and ending whitespace characters.
+        normalize(val) {
+          return this.str(val).toLowerCase().trim();
+        },
+        // Alias of float().
+        number(val) {
+          return this.float(val);
+        },
+        // Returns the string representation of a value.
+        // If it is (null) or (undefined), it is returned as empty string.
+        str(val) {
           return String(val ?? '');
         },
-        trim: function (val) {
+        // Handles a value as string and removes leading and ending whitespace characters.
+        trim(val) {
           return this.str(val).trim();
         },
-        upper: function (val) {
+        // Handles a value as string and converts the characters to upper case.
+        upper(val) {
           return this.str(val).toUpperCase();
         }
       }
