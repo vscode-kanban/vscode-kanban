@@ -117,22 +117,18 @@ window.vscodeKanban.compileFilter = function (expr) {
       extraFunctions: {
         // Handles a value as string and checks if all string arguments can be found inside it (case insensitive).
         all(val, ...args) {
-          const s = this.str(val)
-            .toLowerCase()
-            .trim();
+          const s = this.normalize(val);
 
-          return args.map((a) => this.str(a).toLowerCase().trim())
+          return args.map((a) => this.normalize(a))
             .every((a) => s.includes(a));
         },
         // Handles a value as string and checks if any string argument can be found inside it (case insensitive).
         any(val, ...args) {
-          const s = this.str(val)
-            .toLowerCase()
-            .trim();
+          const s = this.normalize(val);
 
           return args.some((a) => {
             return s.includes(
-              this.str(a).toLowerCase().trim()
+              this.normalize(a)
             );
           });
         },
