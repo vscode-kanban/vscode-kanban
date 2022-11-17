@@ -173,6 +173,10 @@ window.vscodeKanban.compileFilter = function (expr) {
             this.str(val).trim()
           );
         },
+        // Converts a value to a string and checks if value is empty or contains whitespace only.
+        is_empty(val) {
+          return !this.str(val).trim();
+        },
         // Checks if a value is NOT a number.
         is_nan(val, asInt = false) {
           val = this.str(val).trim();
@@ -185,6 +189,11 @@ window.vscodeKanban.compileFilter = function (expr) {
           }
 
           return isNaN(num);
+        },
+        // Checks if a value is (null) or (undefined).
+        is_nil(val) {
+          return typeof val === 'undefined' ||
+            val === null;
         },
         // Handles a value as string and converts the characters to lower case.
         lower(val) {
@@ -215,6 +224,21 @@ window.vscodeKanban.compileFilter = function (expr) {
         // If it is (null) or (undefined), it is returned as empty string.
         str(val) {
           return String(val ?? '');
+        },
+        // Handles a value as string and invokes methods for it.
+        str_invoke(val, funcs, ...args) {
+          val = this.str(val);
+          funcs = this.str(funcs);
+
+          const funcList = funcs.split(',')
+            .map((f) => f.trim())
+            .filter((f) => f !== '');
+
+          for (const func of funcList) {
+            val = val[func].apply(val, args);
+          }
+
+          return val;
         },
         // Handles a value as string and removes leading and ending whitespace characters.
         trim(val) {
