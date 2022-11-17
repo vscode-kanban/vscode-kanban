@@ -17,6 +17,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+// Day.js
+dayjs.extend(dayjs_plugin_isoWeek);
+dayjs.extend(dayjs_plugin_advancedFormat);
+dayjs.extend(dayjs_plugin_customParseFormat);
+dayjs.extend(dayjs_plugin_timezone);
+dayjs.extend(dayjs_plugin_utc);
+
 window.vscode = acquireVsCodeApi();
 window.t = (key) => key;  // start with a dummy t() function
 
@@ -132,6 +139,24 @@ window.vscodeKanban.compileFilter = function (expr) {
             );
           });
         },
+        // Handles arguments as strings and concats them to one string.
+        concat(...args) {
+          return args.map((a) => this.str(a))
+            .join('');
+        },
+        // Handles a value as a string and searches for a sub string (case insensitive).
+        contains(val, searchFor) {
+          val = this.normalize(val);
+          searchFor = this.normalize(searchFor);
+
+          return val.includes(searchFor);
+        },
+        // Logs one or more values.
+        debug(...args) {
+          window.vscodeKanban.log(...args);
+
+          return this;
+        },
         // Returns a value as float number.
         float(val) {
           return parseFloat(
@@ -147,6 +172,19 @@ window.vscodeKanban.compileFilter = function (expr) {
           return parseInt(
             this.str(val).trim()
           );
+        },
+        // Checks if a value is NOT a number.
+        is_nan(val, asInt = false) {
+          val = this.str(val).trim();
+
+          let num;
+          if (asInt) {
+            num = parseInt(val, 10);
+          } else {
+            num = parseFloat(val);
+          }
+
+          return isNaN(num);
         },
         // Handles a value as string and converts the characters to lower case.
         lower(val) {
@@ -165,6 +203,14 @@ window.vscodeKanban.compileFilter = function (expr) {
         number(val) {
           return this.float(val);
         },
+        // (true) if a value matches a regular expression.
+        regex(val, pattern, flags) {
+          val = this.str(val);
+          pattern = this.str(pattern);
+          flags = this.str(flags);
+
+          return new RegExp(pattern, flags || undefined).test(val);
+        },
         // Returns the string representation of a value.
         // If it is (null) or (undefined), it is returned as empty string.
         str(val) {
@@ -173,6 +219,16 @@ window.vscodeKanban.compileFilter = function (expr) {
         // Handles a value as string and removes leading and ending whitespace characters.
         trim(val) {
           return this.str(val).trim();
+        },
+        // Returns the UNIX timestamp of a date/time value.
+        unix(val, isUTC = true) {
+          val = this.str(val);
+
+          if (isUTC) {
+            return dayjs.utc(val).valueOf();
+          } else {
+            return dayjs(val).valueOf();
+          }
         },
         // Handles a value as string and converts the characters to upper case.
         upper(val) {
