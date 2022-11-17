@@ -64,6 +64,7 @@
       let error;
 
       if (filterMode === FILTER_MODE_FILTER_EXPRESSION) {
+        const now = dayjs();
         const semicolon = filter.indexOf(':');
         const filterExpr = filter.substring(semicolon + 1);
 
@@ -72,6 +73,30 @@
 
           predicate = (card) => {
             const category = String(card.category ?? '');
+            const type = String(card.type ?? '').toLowerCase().trim();
+
+            let priority = parseFloat(String(card.prio ?? '0').trim());
+            if (isNaN(priority)) {
+              priority = null;
+            }
+
+            let time = String(card.creation_time ?? '').trim();
+            if (time.length) {
+              try {
+                time = dayjs.utc(time);
+                if (!time.isValid()) {
+                  time = null;
+                }
+              } catch (error) {
+                time = null;
+              }
+            } else {
+              time = null;
+            }
+
+            const isBug = ['bug', 'issue'].includes(type);
+            const isNote = ['', 'note', 'task'].includes(type);
+            const isEmergency = ['emergency'].includes(type);
 
             return !!compiledPredicate({
               assigned_to: String(card.assignedTo?.name ?? ''),
@@ -79,8 +104,22 @@
               category,
               description: String(card.description?.content ?? ''),
               details: String(card.details?.content ?? ''),
+              id: String(card.id ?? ''),
+              is_bug: isBug,
+              is_emerg: isEmergency,
+              is_emergency: isEmergency,
+              is_issue: isBug,
+              is_note: isNote,
+              is_task: isNote,
+              no: false,
+              now: now.valueOf(),
+              prio: priority,
+              priority,
+              time: time ? time.valueOf() : null,
               title: String(card.title ?? ''),
-              type: String(card.type ?? ''),
+              type,
+              utc: now.utc().valueOf(),
+              yes: true,
             });
           };
         } catch (ex) {
