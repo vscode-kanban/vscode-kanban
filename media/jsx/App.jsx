@@ -115,6 +115,7 @@
               now: now.valueOf(),
               prio: priority,
               priority,
+              tag: card.tag,
               time: time ? time.valueOf() : null,
               title: String(card.title ?? ''),
               type,
